@@ -1,0 +1,6 @@
+# ANDROID_JAR = <Path to android.jar>
+
+EXCLUSION_FILE = dat/AndroidRegressionExclusions.txt
+
+# additional jar file: <loader> can be "Primordial" or "Application"
+# ADDITIONAL_JARS = <loader1>,<path to jar1>;<loader2>,<path to jar2>;...

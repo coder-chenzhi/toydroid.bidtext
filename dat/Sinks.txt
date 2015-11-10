@@ -1,0 +1,163 @@
+#TAG Method_Signature Indices...
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 1
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 1
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;)Lorg/apache/http/HttpResponse; 1
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 1
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 2
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 2
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;)Lorg/apache/http/HttpResponse; 2
+HTTP android.net.http.AndroidHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 2
+
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 1
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 1
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 2
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 2
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;)Lorg/apache/http/HttpResponse; 2
+HTTP org.apache.http.client.HttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 2
+
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 1
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 1
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 2
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 2
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;)Lorg/apache/http/HttpResponse; 2
+HTTP org.apache.http.impl.client.AbstractHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 2
+
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 1
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 1
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/client/methods/HttpUriRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 1
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;)Ljava/lang/Object; 2
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/client/ResponseHandler;Lorg/apache/http/protocol/HttpContext;)Ljava/lang/Object; 2
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;)Lorg/apache/http/HttpResponse; 2
+HTTP org.apache.http.impl.client.DefaultHttpClient.execute(Lorg/apache/http/HttpHost;Lorg/apache/http/HttpRequest;Lorg/apache/http/protocol/HttpContext;)Lorg/apache/http/HttpResponse; 2
+
+HTTP org.apache.http.impl.io.AbstractMessageWriter.writeHeadLine(Lorg/apache/http/HttpMessage;)V 1
+HTTP org.apache.http.impl.io.AbstractMessageWriter.write(Lorg/apache/http/HttpMessage;)V 1
+HTTP org.apache.http.impl.io.AbstractSessionOutputBuffer.write([BII)V 1
+HTTP org.apache.http.impl.io.AbstractSessionOutputBuffer.write([B)V 1
+HTTP org.apache.http.impl.io.AbstractSessionOutputBuffer.write(I)V 1
+HTTP org.apache.http.impl.io.AbstractSessionOutputBuffer.writeLine(Ljava/lang/String;)V 1
+HTTP org.apache.http.impl.io.AbstractSessionOutputBuffer.writeLine(Lorg/apache/http/util/CharArrayBuffer;)V 1
+HTTP org.apache.http.impl.io.ChunkedOutputStream.write([BII)V 1
+HTTP org.apache.http.impl.io.ChunkedOutputStream.write(I)V 1
+HTTP org.apache.http.impl.io.ContentLengthOutputStream.write([BII)V 1
+HTTP org.apache.http.impl.io.ContentLengthOutputStream.write([B)V 1
+HTTP org.apache.http.impl.io.ContentLengthOutputStream.write(I)V 1
+HTTP org.apache.http.impl.io.IdentityOutputStream.write([BII)V 1
+HTTP org.apache.http.impl.io.IdentityOutputStream.write([B)V 1
+HTTP org.apache.http.impl.io.IdentityOutputStream.write(I)V 1
+HTTP org.apache.http.io.HttpMessageWriter.write(Lorg/apache/http/HttpMessage;)V 1
+HTTP org.apache.http.io.SessionOutputBuffer.write([BII)V 1
+HTTP org.apache.http.io.SessionOutputBuffer.write([B)V 1
+HTTP org.apache.http.io.SessionOutputBuffer.write(I)V 1
+HTTP org.apache.http.io.SessionOutputBuffer.writeLine(Ljava/lang/String;)V 1
+HTTP org.apache.http.io.SessionOutputBuffer.writeLine(Lorg/apache/http/util/CharArrayBuffer;)V 1
+
+SMS android.telephony.SmsManager.sendDataMessage(Ljava/lang/String;Ljava/lang/String;S[BLandroid/app/PendingIntent;Landroid/app/PendingIntent;)V 4
+SMS android.telephony.SmsManager.sendMultipartTextMessage(Ljava/lang/String;Ljava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;)V 3
+SMS android.telephony.SmsManager.sendTextMessage(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;)V 3
+
+LOG android.util.Log.d(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.d(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.e(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.i(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.i(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.println(ILjava/lang/String;Ljava/lang/String;)I 1 2
+LOG android.util.Log.v(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.v(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.w(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.w(Ljava/lang/String;Ljava/lang/Throwable;)I 0 1
+LOG android.util.Log.wtf(Ljava/lang/String;Ljava/lang/String;)I 0 1
+LOG android.util.Log.wtf(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0 1 2
+LOG android.util.Log.wtf(Ljava/lang/String;Ljava/lang/Throwable;)I 0 1
+
+IO java.io.BufferedOutputStream.write([BII)V 1
+IO java.io.BufferedOutputStream.write([B)V 1
+IO java.io.BufferedWriter.write([CII)V 1
+IO java.io.BufferedWriter.write(I)V 1
+IO java.io.BufferedWriter.write(Ljava/lang/String;II)V 1
+# IO java.io.ByteArrayOutputStream.write([BII)V 1
+# IO java.io.ByteArrayOutputStream.write(I)V 1
+# IO java.io.CharArrayWriter.write([CII)V 1
+# IO java.io.CharArrayWriter.write(I)V 1
+IO java.io.CharArrayWriter.write(Ljava/lang/String;II)V 1
+IO java.io.DataOutputStream.write([BII)V 1
+IO java.io.DataOutputStream.writeBoolean(Z)V 1
+IO java.io.DataOutputStream.writeByte(I)V 1
+IO java.io.DataOutputStream.writeBytes(Ljava/lang/String;)V 1
+IO java.io.DataOutputStream.writeChar(I)V 1
+IO java.io.DataOutputStream.writeChars(Ljava/lang/String;)V 1
+IO java.io.DataOutputStream.writeDouble(D)V 1
+IO java.io.DataOutputStream.writeFloat(F)V 1
+IO java.io.DataOutputStream.writeInt(I)V 1
+IO java.io.DataOutputStream.write(I)V 1
+IO java.io.DataOutputStream.writeLong(J)V 1
+IO java.io.DataOutputStream.writeShort(S)V 1
+IO java.io.DataOutputStream.writeUTF(Ljava/lang/String;)V 1
+IO java.io.DataOutput.write([BII)V 1
+IO java.io.DataOutput.writeBoolean(Z)V 1
+IO java.io.DataOutput.writeByte(I)V 1
+IO java.io.DataOutput.writeBytes(Ljava/lang/String;)V 1
+IO java.io.DataOutput.writeChar(I)V 1
+IO java.io.DataOutput.writeChars(Ljava/lang/String;)V 1
+IO java.io.DataOutput.writeDouble(D)V 1
+IO java.io.DataOutput.writeFloat(F)V 1
+IO java.io.DataOutput.writeInt(I)V 1
+IO java.io.DataOutput.write(I)V 1
+IO java.io.DataOutput.writeLong(J)V 1
+IO java.io.DataOutput.writeShort(S)V 1
+IO java.io.DataOutput.writeUTF(Ljava/lang/String;)V 1
+IO java.io.ObjectOutputStream$PutField.write(Ljava/io/ObjectOutput;)V 1
+IO java.io.ObjectOutputStream.write([BII)V 1
+IO java.io.ObjectOutputStream.writeBoolean(Z)V 1
+IO java.io.ObjectOutputStream.writeByte(I)V 1
+IO java.io.ObjectOutputStream.writeBytes(Ljava/lang/String;)V 1
+IO java.io.ObjectOutputStream.writeChar(I)V 1
+IO java.io.ObjectOutputStream.writeChars(Ljava/lang/String;)V 1
+IO java.io.ObjectOutputStream.writeDouble(D)V 1
+IO java.io.ObjectOutputStream.writeFloat(F)V 1
+IO java.io.ObjectOutputStream.writeInt(I)V 1
+IO java.io.ObjectOutputStream.write(I)V 1
+IO java.io.ObjectOutputStream.writeLong(J)V 1
+IO java.io.ObjectOutputStream.writeShort(S)V 1
+IO java.io.ObjectOutputStream.writeUnshared(Ljava/lang/Object;)V 1
+IO java.io.ObjectOutputStream.writeUTF(Ljava/lang/String;)V 1
+IO java.io.ObjectOutput.write([BII)V 1
+IO java.io.ObjectOutput.write([B)V 1
+IO java.io.ObjectOutput.write(I)V 1
+IO java.io.ObjectOutput.writeObject(Ljava/lang/Object;)V 1
+IO java.io.OutputStream.write([BII)V 1
+IO java.io.OutputStream.write([B)V 1
+IO java.io.OutputStream.write(I)V 1
+IO java.io.OutputStreamWriter.write([CII)V 1
+IO java.io.OutputStreamWriter.write(I)V 1
+IO java.io.OutputStreamWriter.write(Ljava/lang/String;II)V 1
+# IO java.io.PipedOutputStream.write([BII)V 1
+# IO java.io.PipedOutputStream.write([B)V 1
+# IO java.io.StringWriter.write(I)V 1
+# IO java.io.StringWriter.write(Ljava/lang/String;II)V 1
+# IO java.io.StringWriter.write(Ljava/lang/String;)V 1
+IO java.io.Writer.write([CII)V 1
+IO java.io.Writer.write([C)V 1
+IO java.io.Writer.write(I)V 1
+IO java.io.Writer.write(Ljava/lang/String;II)V 1
+IO java.io.Writer.write(Ljava/lang/String;)V 1
+
+FILE java.io.FileOutputStream.write([BII);V 1
+FILE java.io.FileOutputStream.write(I);V 1
+
+SOCKET java.net.DatagramSocket.send(Ljava/net/DatagramPacket;)V 1
+SOCKET java.net.MulticastSocket.send(Ljava/net/DatagramPacket;B)V 1
+SOCKET java.net.Socket.sendUrgentData(I)V 1
+
+URL java.net.URL.getContent()Ljava/lang/Object; 0
+URL java.net.URL.getContent([Ljava/lang/Class;)Ljava/lang/Object; 0
+URL java.net.URL.openConnection(Ljava/net/Proxy;)Ljava/net/URLConnection; 0
+URL java.net.URL.openConnection()Ljava/net/URLConnection; 0
+URL java.net.URL.openStream()Ljava/io/InputStream; 0
