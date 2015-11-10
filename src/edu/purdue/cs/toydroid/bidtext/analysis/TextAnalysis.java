@@ -2,8 +2,10 @@ package edu.purdue.cs.toydroid.bidtext.analysis;
 
 import java.io.StringReader;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -29,7 +31,7 @@ public class TextAnalysis {
 
 	private final static String GRAMMAR = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
 
-	private final static Pattern keywordPattern = Pattern.compile("\\b(lat|lng|lon|long|latlng|latitude|longitude|imei|imsi|u(ser)?((\\s|_)?name|(\\s|_)?id)|e-?mail|pin(code|\\s(code|number|no|#))?|password|pwd|passwd)\\b");
+	private final static Pattern keywordPattern = Pattern.compile("\\b(lat|lng|lon|latlng|latitude|longitude|imei|imsi|u(ser)?((\\s|_)?name|(\\s|_)?id)|e-?mail|pin(code|\\s(code|number|no|#))?|password|pwd|passwd)\\b");
 
 	private static LexicalizedParser lexParser;
 	public String tag;
@@ -191,7 +193,8 @@ public class TextAnalysis {
 					record(str);
 					toRemove.add(str);
 				}
-			} else if (str.length() == 1 || (!str.isEmpty() && Character.isDigit(str.charAt(0)))) {
+			} else if (str.length() == 1
+					|| (!str.isEmpty() && Character.isDigit(str.charAt(0)))) {
 				continue;
 			} else if (str.startsWith("android.action.")
 					|| str.startsWith("android.permission.")
@@ -260,40 +263,16 @@ public class TextAnalysis {
 			// System.err.println(" STR = " + str + "  OK.");
 			return true;
 		}
-		if (patternIdentity.matcher(str).find()) {
-			return true;
-		} else if (patternCredential.matcher(str).find()) {
-			return true;
-		} else if (patternContact.matcher(str).find()) {
-			return true;
-		} else if (patternAccount.matcher(str).find()) {
-			return true;
-		} else if (patternCreditCard.matcher(str).find()) {
-			return true;
-		} else if (patternSSN.matcher(str).find()) {
-			return true;
-		} else if (patternProtection.matcher(str).find()) {
-			return true;
-		} else if (patternPersonalInfo.matcher(str).find()) {
-			return true;
-		} else if (patternHealth.matcher(str).find()) {
-			return true;
-		} else if (patternFinancialInfo.matcher(str).find()) {
-			return true;
+		Iterator<Map.Entry<String, Pattern>> iter = SensitiveTerms.iterateSensitiveTerms();
+		while (iter.hasNext()) {
+			Map.Entry<String, Pattern> entry = iter.next();
+			Pattern p = entry.getValue();
+			if (p.matcher(str).find()) {
+				return true;
+			}
 		}
 		return false;
 	}
-
-	private final static Pattern patternIdentity = Pattern.compile("ì•„ì´ë””|ç”¨æˆ·å|\\b(user(\\s?name|\\sid)((\\sor\\s|/)e-?mail)?|e-?mail(\\sor\\s|/)user(\\s)?name|nick\\s*name|moniker|cognomen|sobriquet|soubriquet|byname)\\b");
-	private final static Pattern patternCredential = Pattern.compile("ë¹„ë°€ë²ˆí˜¸|å¯?ã€?\\s)*ç |å¯?ã€?\\s)*ç¢¼|\\b(pin(code|\\s(code|number|no|#))?|personal\\sidentification\\s(number|no)|password(s)?|passwort|watchword|parole|countersign|(security\\s)?passcode)\\b");
-	private final static Pattern patternContact = Pattern.compile("ì´ë©”ì¼|é›»å­éƒµä»¶|(ç”µå­)?é‚?ã€?\\s)*ç®±|æ‰‹æœºå?ç ??|æ‰‹æ©Ÿè™?ç¢??|\\b((phone:)?e-?mail|e-?mail(\\s)?address(es)?|(mobile\\s|tele|cell|your\\s)?phone(\\s(no|number|#))?|mobile\\s(no|number|#)|gmail|contact(s|\\sname)|fax)\\b");
-	private final static Pattern patternAccount = Pattern.compile("ç™?ã€?\\s)*å½•|ç™?ã€?\\s)*å…¥|\\b((your\\s)?login(\\s(credential|certificat(e|ion))(s)?)?|regist(er|ration|ry)|user\\s(authentication|hallmark|assay(\\s|-)mark)|sign(ing)?\\s(in|up)|check\\sin|log(-|\\s+)(in|on)(to)?)\\b");
-	private final static Pattern patternCreditCard = Pattern.compile("é“¶è¡Œ(å??å¡å·|\\b(((credit|charge|my|your)(ã€?\\s)?)?card(ã€?\\s)?(number|no|#|information|statement)|(credit|charge)(ã€?\\s)?card|cvc((ã€?\\s)+code)?)\\b");;
-	private final static Pattern patternSSN = Pattern.compile("èº?ä»½|åˆ?è­?å­??è™Ÿ|èº«ä»½è­‰å¾Œäº”ç¢¼|èº«ä»½è¯?å?ç ??)?|\\b(((digits\\s)?of\\s)?ssn|tin|(federal|national)\\s(id|identity)|(your\\s)?social\\ssec(urity)?(\\s(number|no|#))?)\\b");
-	private final static Pattern patternProtection = Pattern.compile("\\b(security\\s(answer|code|token|item)|enter\\syour\\s(answer|reply|response)|(identification|designation)\\s(code|number|no)|activation\\s(code|number|no)|financial\\sinstitution)\\b");
-	private final static Pattern patternPersonalInfo = Pattern.compile("\\b((first|last)(\\s)?name|age|sex|gender|birth(\\s)?(date|day)?|date\\sof\\birth|interests|dropbox|facebook|address(es)?)\\b");
-	private final static Pattern patternHealth = Pattern.compile("\\b(weight|height|health|cholesterol|glucose|obese|calories|kcal|doctor|blood(\\stype)?)\\b");
-	private final static Pattern patternFinancialInfo = Pattern.compile("\\b(repayment|(payment(s)?|deposit|loan)(\\samount)?|income|expir(y|ation)(\\sdate)?|paypal|banking|debit|mortgage|taxable|(down|monthly)\\spayment|payment\\s(information|details)|cardholder's\\sname|billing\\saddress|opening\\sbalance)\\b");
 
 	public static void main(String[] args) {
 		TextAnalysis a = new TextAnalysis();

@@ -57,8 +57,8 @@ public class TextLeak implements Callable<TextLeak> {
 	private static long timeout = 20;
 	private static long taskStart;
 
-	//static String ApkFile = "E:\\Eclipse-Workspace\\TestAndroidAct\\bin\\TestAndroidAct.apk";
-	static String ApkFile = "E:\\x\\y\\AM-com.nitrogen.android-221000000.apk";
+	static String ApkFile = "E:\\Eclipse-Workspace\\TestAndroidAct\\bin\\TestAndroidAct.apk";
+	//static String ApkFile = "E:\\x\\y\\AM-com.nitrogen.android-221000000.apk";
 
 	public static void main(String[] args) {
 		taskStart = System.currentTimeMillis();
