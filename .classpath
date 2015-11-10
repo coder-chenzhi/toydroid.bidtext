@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="res"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/apktool.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-api-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-core-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/com.ibm.wala.cast.jar" sourcepath="/com.ibm.wala.cast"/>
+	<classpathentry kind="lib" path="lib/com.ibm.wala.core.jar" sourcepath="/com.ibm.wala.core"/>
+	<classpathentry kind="lib" path="lib/com.ibm.wala.dalvik.jar" sourcepath="/com.ibm.wala.dalvik"/>
+	<classpathentry kind="lib" path="lib/com.ibm.wala.shrike.jar" sourcepath="/com.ibm.wala.shrike"/>
+	<classpathentry kind="lib" path="lib/com.ibm.wala.util.jar" sourcepath="/com.ibm.wala.util"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/dexlib-1.3.4-dev.jar"/>
+	<classpathentry kind="lib" path="lib/guava-13.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/logback-classic-1.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/logback-core-1.0.9.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-parser-3.4.1-models.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-parser.jar" sourcepath="lib/stanford-parser-3.4.1-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
