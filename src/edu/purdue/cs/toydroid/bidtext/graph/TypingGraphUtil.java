@@ -340,6 +340,8 @@ public class TypingGraphUtil {
 	/************************************************************/
 	/************** Handle Specific WALA Statement **************/
 	/************************************************************/
+	private static Statement cachedStmt = null;
+
 	private static void handlePhi(CallGraph cg, Graph<Statement> sdg,
 			Statement stmt) {
 		CGNode cgNode = stmt.getNode();
@@ -412,6 +414,7 @@ public class TypingGraphUtil {
 			int pv = pcstmt.getValueNumber();// recorded for later use in param
 												// callee
 			newCachedNode = sg.findOrCreate(pv);
+			cachedStmt = stmt;
 		}
 		return newCachedNode;
 	}
@@ -431,16 +434,16 @@ public class TypingGraphUtil {
 			int pv = pcstmt.getValueNumber();
 			TypingNode paramNode = sg.findOrCreate(pv);
 			// currentTypingGraph.mergeClass(cachedNode, paramNode);
-			TypingRecord rec = sg.typingGraph.getTypingRecord(cachedNode.getGraphNodeId());
-			if (rec == null) {
-				rec = sg.typingGraph.findOrCreateTypingRecord(paramNode.getGraphNodeId());
-				currentTypingGraph.setTypingRecord(cachedNode.getGraphNodeId(),
-						rec);
-			} else {
-				currentTypingGraph.setTypingRecord(paramNode.getGraphNodeId(),
-						rec);
-			}
-
+			TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(cachedNode.getGraphNodeId());
+			TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(paramNode.getGraphNodeId());
+			TypingConstraint c = new TypingConstraint(
+					paramNode.getGraphNodeId(), TypingConstraint.EQ,
+					cachedNode.getGraphNodeId());
+			if (cachedStmt != null)
+				c.addPath(cachedStmt);
+			c.addPath(stmt);
+			orec.addForwardTypingConstraint(c);
+			nrec.addBackwardTypingConstraint(c);
 		}
 	}
 
@@ -1205,14 +1208,14 @@ public class TypingGraphUtil {
 			Iterator<String> appendIter = rec.iteratorAppendResults();
 			while (appendIter.hasNext()) {
 				String str = appendIter.next();
-				//System.err.println(tn.getGraphNodeId() + "  >> "+str);
+				// System.err.println(tn.getGraphNodeId() + "  >> "+str);
 				if (str.startsWith("http:") || str.startsWith("https:")) {
 					str = str.substring(5);
 				}
 				Matcher matcher = NameValuePattern.matcher(str);
 				while (matcher.find()) {
-//					System.err.println(matcher.groupCount() + "  "
-//							+ matcher.group(1));
+					// System.err.println(matcher.groupCount() + "  "
+					// + matcher.group(1));
 					String matched = matcher.group(1);
 					int vStartIdx = matched.indexOf(TypingRecord.APPEND_VAR_PREFIX);
 					String varStr = matched.substring(
