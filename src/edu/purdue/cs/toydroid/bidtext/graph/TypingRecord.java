@@ -17,9 +17,6 @@ public class TypingRecord {
 	private Set<TypingConstraint> forwardConstraints;
 	private Set<TypingConstraint> backwardConstraints;
 	private Set<StringBuilder> appendResults;
-	// in some instructions, LHS and RHS use the same typing record. 
-	// then we need to record such stmts for path tracking. 
-	private List<Statement> involvedStmts;
 
 	public TypingRecord(int id) {
 		initialId = id;
@@ -55,20 +52,6 @@ public class TypingRecord {
 			return merge(rec);
 		}
 		return false;
-	}
-	
-	public boolean addInvolvedStmt(Statement stmt) {
-		if (involvedStmts == null) {
-			involvedStmts = new LinkedList<Statement>();
-		}
-		return involvedStmts.add(stmt);
-	}
-	
-	/**
-	 * Return might be null. Carefully check the return value at call sites.
-	 */
-	public List<Statement> getInvolvedStmts() {
-		return involvedStmts;
 	}
 	
 	public Iterator<String> iteratorAppendResults() {
