@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -136,7 +138,7 @@ public class AnalysisUtil {
 			return;
 		}
 		Map<Entrypoint, Set<TypingNode>> visited = new HashMap<Entrypoint, Set<TypingNode>>();
-		Set<String> texts = new HashSet<String>();
+		Set<String> codeTexts = new HashSet<String>();
 		Set<Integer> constants = new HashSet<Integer>();
 		while (args.hasNext()) {
 			TypingNode gNode = args.next();
@@ -145,17 +147,81 @@ public class AnalysisUtil {
 			}
 			TypingSubGraph sg = sink.enclosingTypingSubGraph();
 			TypingGraph graph = sink.enclosingTypingGraph();
-			dumpTextForNode(gNode, sg, graph, texts, constants);
-			dumpTextForFields(gNode, sg, graph, texts, constants);
+			dumpTextForNode(gNode, sg, graph, codeTexts, constants);
+			dumpTextForFields(gNode, sg, graph, codeTexts, constants);
 		}
 		visited.clear();
 		visited = null;
 
-		Set<String> combinedTexts = new HashSet<String>();
-		combinedTexts.addAll(texts);
+		TextAnalysis textAnalysis = new TextAnalysis();
+		String sensitiveTag = textAnalysis.analyze(codeTexts, false);
+
+		Set<String> guiTexts = new HashSet<String>();
+		dumpTextForPossibleGUI(sink, writer, guiTexts);
+
+		// for each widget we collected, if anyone exists in multiple layouts,
+		// all those layouts are recorded. but if we can find more than one
+		// widget, we may find out the correct layout.
+		Map<Integer, IdCountPair> rankedLayout = new HashMap<Integer, IdCountPair>();
 		Set<Integer> toRemove = new HashSet<Integer>();
 		for (Integer iObj : constants) {
 			String guiText = ResourceUtil.getLayoutText(iObj);
+			if (guiText != null) {
+				if (!guiText.isEmpty()) {
+					try {
+						BufferedReader reader = new BufferedReader(
+								new StringReader(guiText));
+						String line = null;
+						while ((line = reader.readLine()) != null) {
+							line = line.trim();
+							if (!line.isEmpty()) {
+								guiTexts.add(line);
+							}
+						}
+					} catch (Exception e) {
+
+					}
+					toRemove.add(iObj);
+				}
+			} else {
+				Set<Integer> s = ResourceUtil.getLayouts(iObj);
+				if (s != null) {
+					for (Integer i : s) {
+						IdCountPair p = rankedLayout.get(i);
+						if (p == null) {
+							p = new IdCountPair(i);
+							rankedLayout.put(i, p);
+						} else {
+							p.increment();
+						}
+					}
+				}
+			}
+		}
+
+		Set<Integer> interestingLayouts = new HashSet<Integer>();
+		int nRankedLayouts = rankedLayout.size();
+		if (nRankedLayouts == 1) {
+			IdCountPair p = rankedLayout.values().iterator().next();
+			Integer layoutId = p.id;
+			interestingLayouts.add(layoutId);
+		} else if (nRankedLayouts > 1) {
+			Collection<IdCountPair> toRank = rankedLayout.values();
+			Object[] objArray = toRank.toArray();
+			Arrays.sort(objArray);
+			int largestRank = -1;
+			for (int i = nRankedLayouts - 1; i >= 0; i--) {
+				IdCountPair p = (IdCountPair) objArray[i];
+				if (largestRank <= p.count) {
+					interestingLayouts.add(p.id);
+					largestRank = p.count;
+				} else {
+					break;
+				}
+			}
+		}
+		for (Integer lId : interestingLayouts) {
+			String guiText = ResourceUtil.getLayoutText(lId);
 			if (guiText != null && !guiText.isEmpty()) {
 				try {
 					BufferedReader reader = new BufferedReader(
@@ -164,24 +230,21 @@ public class AnalysisUtil {
 					while ((line = reader.readLine()) != null) {
 						line = line.trim();
 						if (!line.isEmpty()) {
-							combinedTexts.add(line);
+							guiTexts.add(line);
 						}
 					}
 				} catch (Exception e) {
 
 				}
-				toRemove.add(iObj);
 			}
 		}
 
-		dumpTextForPossibleGUI(sink, writer, combinedTexts);
+		String guiSensitiveTag = textAnalysis.analyze(guiTexts, true);
 
-		TextAnalysis textAnalysis = new TextAnalysis();
-		String sensitiveTag = textAnalysis.analyze(combinedTexts);
 		if (!sensitiveTag.isEmpty()) {
-			logger.error("   $ {}", sensitiveTag);
+			logger.debug("   $[CODE] {}", sensitiveTag);
 			try {
-				writer.write(" ^ ");
+				writer.write(" ^[CODE]: ");
 				writer.write(sensitiveTag);
 				writer.newLine();
 			} catch (IOException e) {
@@ -189,9 +252,28 @@ public class AnalysisUtil {
 			}
 		}
 
-		for (String t : combinedTexts) {
+		if (!guiSensitiveTag.isEmpty()) {
+			logger.debug("   $[GUI] {}", guiSensitiveTag);
+			try {
+				writer.write(" ^[GUI]: ");
+				writer.write(guiSensitiveTag);
+				writer.newLine();
+			} catch (IOException e) {
+
+			}
+		}
+
+		for (String t : codeTexts) {
 			try {
 				writer.write(" - ");
+				writer.write(t);
+				writer.newLine();
+			} catch (IOException e) {
+			}
+		}
+		for (String t : guiTexts) {
+			try {
+				writer.write(" + ");
 				writer.write(t);
 				writer.newLine();
 			} catch (IOException e) {
@@ -361,6 +443,25 @@ public class AnalysisUtil {
 
 				}
 			}
+		}
+	}
+
+	static class IdCountPair implements Comparable<IdCountPair> {
+		Integer id;
+		int count;
+
+		IdCountPair(Integer id) {
+			this.id = id;
+			count = 1;
+		}
+
+		void increment() {
+			count++;
+		}
+
+		@Override
+		public int compareTo(IdCountPair that) {
+			return this.count - that.count;
 		}
 	}
 }
