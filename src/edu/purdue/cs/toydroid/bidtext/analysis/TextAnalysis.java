@@ -36,50 +36,54 @@ public class TextAnalysis {
 	private static LexicalizedParser lexParser;
 	public String tag;
 	private StringBuilder tagBuilder;
+	private boolean isGUIText;
 
 	public TextAnalysis() {
-		tagBuilder = new StringBuilder();
 	}
 
-	public String analyze(Set<String> texts) {
-		if (texts.contains("location")) {
-			texts.remove("location");
-			if (texts.contains("gps")) {
-				texts.remove("gps");
-				record("location/gps");
+	public String analyze(Set<String> texts, boolean isGUIText) {
+		this.isGUIText = isGUIText;
+		tagBuilder = new StringBuilder();
+		if (!isGUIText) {
+			if (texts.contains("location")) {
+				texts.remove("location");
+				if (texts.contains("gps")) {
+					texts.remove("gps");
+					record("location/gps");
+				}
+				if (texts.contains("network")) {
+					texts.remove("network");
+					record("location/network");
+				}
 			}
-			if (texts.contains("network")) {
-				texts.remove("network");
-				record("location/network");
+			if (texts.contains("latitude")) {
+				texts.remove("latitude");
+				record("latitude");
+			}
+			if (texts.contains("longitude")) {
+				texts.remove("longitude");
+				record("longitude");
+			}
+			if (texts.contains("lat")) {
+				texts.remove("lat");
+				record("lat");
+				if (texts.contains("lng")) {
+					texts.remove("lng");
+					record("lng");
+				} else if (texts.contains("long")) {
+					texts.remove("long");
+					record("long");
+				} else if (texts.contains("lon")) {
+					texts.remove("lon");
+					record("lon");
+				}
+			}
+			if (texts.contains("android_id")) {
+				texts.remove("android_id");
+				record("android_id");
 			}
 		}
-		if (texts.contains("latitude")) {
-			texts.remove("latitude");
-			record("latitude");
-		}
-		if (texts.contains("longitude")) {
-			texts.remove("longitude");
-			record("longitude");
-		}
-		if (texts.contains("lat")) {
-			texts.remove("lat");
-			record("lat");
-			if (texts.contains("lng")) {
-				texts.remove("lng");
-				record("lng");
-			} else if (texts.contains("long")) {
-				texts.remove("long");
-				record("long");
-			} else if (texts.contains("lon")) {
-				texts.remove("lon");
-				record("lon");
-			}
-		}
-		if (texts.contains("android_id")) {
-			texts.remove("android_id");
-			record("android_id");
-		}
-		List<String> f = puralize(texts);
+		List<String> f = purify(texts);
 		// logger.debug("  {}", f.toString());
 		check(f);
 		return tagBuilder.toString();
@@ -141,7 +145,7 @@ public class TextAnalysis {
 							TreeGraphNode n = td.dep();
 							String ns = n.label().value();
 							if ("should".equals(ns) || "shall".equals(ns)
-									|| "could".equals(ns) || "can".equals(ns)) {
+							/* || "could".equals(ns) || "can".equals(ns) */) {
 								logger.info("    * Negation detected: <<{}>>",
 										s);
 							} else if ("do".equals(ns)
@@ -174,7 +178,7 @@ public class TextAnalysis {
 		tagBuilder.append("]");
 	}
 
-	private List<String> puralize(Set<String> texts) {
+	private List<String> purify(Set<String> texts) {
 		List<String> f = new LinkedList<String>();
 		Set<String> toRemove = new HashSet<String>();
 		for (String str : texts) {
@@ -259,15 +263,18 @@ public class TextAnalysis {
 
 	private boolean containsKeywords(String str) {
 		// System.err.println("STR = " + str);
-		if (keywordPattern.matcher(str).find()) {
-			// System.err.println(" STR = " + str + "  OK.");
-			return true;
-		}
-		Iterator<Map.Entry<String, Pattern>> iter = SensitiveTerms.iterateSensitiveTerms();
-		while (iter.hasNext()) {
-			Map.Entry<String, Pattern> entry = iter.next();
-			Pattern p = entry.getValue();
-			if (p.matcher(str).find()) {
+		if (isGUIText) {
+			Iterator<Map.Entry<String, Pattern>> iter = SensitiveTerms.iterateSensitiveTerms();
+			while (iter.hasNext()) {
+				Map.Entry<String, Pattern> entry = iter.next();
+				Pattern p = entry.getValue();
+				if (p.matcher(str).find()) {
+					return true;
+				}
+			}
+		} else {
+			if (keywordPattern.matcher(str).find()) {
+				// System.err.println(" STR = " + str + "  OK.");
 				return true;
 			}
 		}
@@ -282,7 +289,7 @@ public class TextAnalysis {
 		l.add("include user_id. do not include username. ");
 		l.add(".email");
 		// a.check(l);
-		a.analyze(l);
+		a.analyze(l, false);
 		System.out.println(l);
 	}
 
