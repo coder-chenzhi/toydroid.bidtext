@@ -37,6 +37,17 @@ public class StringNode {
 		return bPath.iterator();
 	}
 
+	/**
+	 * Check if S exists in the forward path. If not, we may add it to the
+	 * backward path later.
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public boolean everPropagatedThrough(Statement s) {
+		return fPath.contains(s);
+	}
+
 	public boolean equals(Object obj) {
 		if (obj instanceof StringNode) {
 			StringNode that = (StringNode) obj;

@@ -37,6 +37,10 @@ public class FieldNode {
 		return bPath.iterator();
 	}
 
+	public boolean everPropagatedThrough(Statement s) {
+		return fPath.contains(s);
+	}
+
 	public boolean equals(Object obj) {
 		if (obj instanceof FieldNode) {
 			FieldNode that = (FieldNode) obj;

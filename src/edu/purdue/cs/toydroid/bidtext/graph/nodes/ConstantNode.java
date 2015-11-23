@@ -38,6 +38,10 @@ public class ConstantNode {
 		return bPath.iterator();
 	}
 
+	public boolean everPropagatedThrough(Statement s) {
+		return fPath.contains(s);
+	}
+
 	public boolean equals(Object obj) {
 		if (obj instanceof ConstantNode) {
 			ConstantNode that = (ConstantNode) obj;
