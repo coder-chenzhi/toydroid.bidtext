@@ -50,4 +50,31 @@ public class TypingConstraint {
 	public int hashCode() {
 		return lhs * 65537 + rhs * 129 + sym;
 	}
+
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(lhs);
+		switch (sym) {
+			case EQ:
+				builder.append("=");
+				break;
+			case GE:
+				builder.append(">=");
+				break;
+			case GE_APPEND:
+				builder.append(">=[append]");
+				break;
+			case GE_UNIDIR:
+				builder.append(">-");
+				break;
+			case GE_ASSIGN:
+				builder.append(">=[assign]");
+				break;
+			default:
+				builder.append("/\\");
+				break;
+		}
+		builder.append(rhs);
+		return builder.toString();
+	}
 }
