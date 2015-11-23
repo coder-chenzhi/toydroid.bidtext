@@ -10,7 +10,7 @@ public class TypingRecord {
 	public static final String APPEND_VAR_PREFIX = "+*^";
 	public static final String APPEND_VAR_POSTFIX = "^*+";
 	public int initialId;
-	private Set<String> typingTexts;
+	private Map<String, List<Statement>> typingTexts;
 	private Set<Object> typingConstants;
 	private Set<SimpleGraphNode> inputFields;
 	private Set<SimpleGraphNode> outputFields;
@@ -20,7 +20,7 @@ public class TypingRecord {
 
 	public TypingRecord(int id) {
 		initialId = id;
-		typingTexts = new HashSet<String>();
+		typingTexts = new HashMap<String, List<Statement>>();
 		typingConstants = new HashSet<Object>();
 		inputFields = new HashSet<SimpleGraphNode>();
 		outputFields = new HashSet<SimpleGraphNode>();
@@ -35,11 +35,38 @@ public class TypingRecord {
 		int cSize = typingConstants.size();
 		int ifSize = inputFields.size();
 		int ofSize = outputFields.size();
-		typingTexts.addAll(rec.typingTexts);
+		typingTexts.putAll(rec.typingTexts);
 		typingConstants.addAll(rec.typingConstants);
 		inputFields.addAll(rec.inputFields);
 		outputFields.addAll(rec.outputFields);
 		if (tSize != typingTexts.size() || cSize != typingConstants.size()
+				|| ifSize != inputFields.size()
+				|| ofSize != outputFields.size()) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean merge(TypingRecord rec, List<Statement> path) {
+		Map<String, List<Statement>> localTexts = typingTexts;
+		int tSize = localTexts.size();
+		int cSize = typingConstants.size();
+		int ifSize = inputFields.size();
+		int ofSize = outputFields.size();
+		Set<Map.Entry<String, List<Statement>>> set = rec.typingTexts.entrySet();
+		for (Map.Entry<String, List<Statement>> entry : set) {
+			String key = entry.getKey();
+			if (!localTexts.containsKey(key)) {
+				List<Statement> list = new LinkedList<Statement>();
+				list.addAll(entry.getValue());
+				list.addAll(path);
+				localTexts.put(key, list);
+			}
+		}
+		typingConstants.addAll(rec.typingConstants);
+		inputFields.addAll(rec.inputFields);
+		outputFields.addAll(rec.outputFields);
+		if (tSize != localTexts.size() || cSize != typingConstants.size()
 				|| ifSize != inputFields.size()
 				|| ofSize != outputFields.size()) {
 			return true;
@@ -53,13 +80,14 @@ public class TypingRecord {
 		}
 		return false;
 	}
-	
+
 	public Iterator<String> iteratorAppendResults() {
-		return new Iterator<String>(){
+		return new Iterator<String>() {
 			Iterator<StringBuilder> iter;
 			{
 				iter = appendResults.iterator();
 			}
+
 			@Override
 			public boolean hasNext() {
 				return iter.hasNext();
@@ -72,9 +100,9 @@ public class TypingRecord {
 
 			@Override
 			public void remove() {
-				
+
 			}
-			
+
 		};
 	}
 
@@ -94,14 +122,15 @@ public class TypingRecord {
 			boolean emptyBuilder = false;
 			if (builder.length() == 0) {
 				emptyBuilder = true;
-				//builder.append(APPEND_PREFIX);
+				// builder.append(APPEND_PREFIX);
 			}
 
 			if (emptyBuilder) {
 				builder.append(str);
-				//builder.append(APPEND_POSTFIX);
+				// builder.append(APPEND_POSTFIX);
 			} else {
-				//builder.insert(builder.length() - APPEND_POSTFIX.length(), str);
+				// builder.insert(builder.length() - APPEND_POSTFIX.length(),
+				// str);
 				builder.append(str);
 			}
 		}
@@ -115,25 +144,32 @@ public class TypingRecord {
 			boolean emptyBuilder = false;
 			if (builder.length() == 0) {
 				emptyBuilder = true;
-				//builder.append(APPEND_PREFIX);
+				// builder.append(APPEND_PREFIX);
 			}
 
 			if (emptyBuilder) {
 				builder.append(APPEND_VAR_PREFIX);
 				builder.append(nodeId);
 				builder.append(APPEND_VAR_POSTFIX);
-				//builder.append(APPEND_POSTFIX);
+				// builder.append(APPEND_POSTFIX);
 			} else {
-				String str = String.format("%s%d%s", APPEND_VAR_PREFIX,
-						nodeId, APPEND_VAR_POSTFIX);
-				//builder.insert(builder.length() - APPEND_POSTFIX.length(), str);
+				String str = String.format("%s%d%s", APPEND_VAR_PREFIX, nodeId,
+						APPEND_VAR_POSTFIX);
+				// builder.insert(builder.length() - APPEND_POSTFIX.length(),
+				// str);
 				builder.append(str);
 			}
 		}
 	}
 
 	public boolean addTypingText(String s) {
-		return typingTexts.add(s);
+		Map<String, List<Statement>> m = typingTexts;
+		if (!m.containsKey(s)) {
+			List<Statement> l = new LinkedList<Statement>();
+			m.put(s, l);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean addTypingConstant(Object i) {
@@ -185,7 +221,7 @@ public class TypingRecord {
 		return backwardConstraints;
 	}
 
-	public Set<String> getTypingTexts() {
+	public Map<String, List<Statement>> getTypingTexts() {
 		return typingTexts;
 	}
 
