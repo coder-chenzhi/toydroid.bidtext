@@ -350,7 +350,7 @@ public class TypingGraphUtil {
 		}
 		TypingSubGraph sg = currentTypingGraph.findOrCreateSubGraph(cgNode);
 		PhiStatement phiStmt = (PhiStatement) stmt;
-		handleSSAPhi(cgNode, phiStmt.getPhi(), sg);
+		handleSSAPhi(cgNode, phiStmt, phiStmt.getPhi(), sg);
 	}
 
 	private static TypingNode handleNormal(CallGraph cg, Graph<Statement> sdg,
@@ -905,8 +905,8 @@ public class TypingGraphUtil {
 
 	}
 
-	private static void handleSSAPhi(CGNode cgNode, SSAPhiInstruction inst,
-			TypingSubGraph sg) {
+	private static void handleSSAPhi(CGNode cgNode, PhiStatement stmt,
+			SSAPhiInstruction inst, TypingSubGraph sg) {
 		int def = inst.getDef();
 		int nUse = inst.getNumberOfUses();
 		TypingNode defNode = sg.findOrCreate(def);
@@ -924,6 +924,7 @@ public class TypingGraphUtil {
 					TypingConstraint.GE, useNode.getGraphNodeId());
 			defRec.addBackwardTypingConstraint(c);
 			useRec.addForwardTypingConstraint(c);
+			c.addPath(stmt);
 			// currentTypingGraph.mergeClass(useNode, defNode);
 		}
 	}
