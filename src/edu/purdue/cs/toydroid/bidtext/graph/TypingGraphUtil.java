@@ -654,13 +654,13 @@ public class TypingGraphUtil {
 		TypingNode refNode = sg.findOrCreate(ref);
 		TypingNode defNode = sg.findOrCreate(def);
 		// currentTypingGraph.mergeClass(refNode, defNode);
-		TypingRecord rec = currentTypingGraph.getTypingRecord(refNode.getGraphNodeId());
-		if (rec == null) {
-			rec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
-			currentTypingGraph.setTypingRecord(refNode.getGraphNodeId(), rec);
-		} else {
-			currentTypingGraph.setTypingRecord(defNode.getGraphNodeId(), rec);
-		}
+		TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(refNode.getGraphNodeId());
+		TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
+		TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
+				TypingConstraint.EQ, refNode.getGraphNodeId());
+		c.addPath(stmt);
+		orec.addForwardTypingConstraint(c);
+		nrec.addForwardTypingConstraint(c);
 	}
 
 	private static void handleSSAArrayStore(CGNode cgNode,
