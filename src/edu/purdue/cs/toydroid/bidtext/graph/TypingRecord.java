@@ -104,6 +104,14 @@ public class TypingRecord {
 		return false;
 	}
 
+	public boolean mergeIfEmptyTexts(TypingRecord rec, List<Statement> path) {
+		if (typingTexts.isEmpty()) {
+			return merge(rec, path);
+		}
+		return false;
+	}
+
+	@Deprecated
 	public boolean mergeIfEmptyTexts(TypingRecord rec) {
 		if (typingTexts.isEmpty()) {
 			return merge(rec);
