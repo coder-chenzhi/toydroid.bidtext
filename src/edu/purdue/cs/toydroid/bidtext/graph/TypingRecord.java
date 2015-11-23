@@ -12,8 +12,8 @@ public class TypingRecord {
 	public int initialId;
 	private Map<String, List<Statement>> typingTexts;
 	private Set<Object> typingConstants;
-	private Set<SimpleGraphNode> inputFields;
-	private Set<SimpleGraphNode> outputFields;
+	private Map<SimpleGraphNode, List<Statement>> inputFields;
+	private Map<SimpleGraphNode, List<Statement>> outputFields;
 	private Set<TypingConstraint> forwardConstraints;
 	private Set<TypingConstraint> backwardConstraints;
 	private Set<StringBuilder> appendResults;
@@ -22,14 +22,15 @@ public class TypingRecord {
 		initialId = id;
 		typingTexts = new HashMap<String, List<Statement>>();
 		typingConstants = new HashSet<Object>();
-		inputFields = new HashSet<SimpleGraphNode>();
-		outputFields = new HashSet<SimpleGraphNode>();
+		inputFields = new HashMap<SimpleGraphNode, List<Statement>>();
+		outputFields = new HashMap<SimpleGraphNode, List<Statement>>();
 		forwardConstraints = new HashSet<TypingConstraint>();
 		backwardConstraints = new HashSet<TypingConstraint>();
 		appendResults = new HashSet<StringBuilder>();
 	}
 
 	// True - changed; False - unchanged.
+	@Deprecated
 	public boolean merge(TypingRecord rec) {
 		int tSize = typingTexts.size();
 		int cSize = typingConstants.size();
@@ -37,8 +38,8 @@ public class TypingRecord {
 		int ofSize = outputFields.size();
 		typingTexts.putAll(rec.typingTexts);
 		typingConstants.addAll(rec.typingConstants);
-		inputFields.addAll(rec.inputFields);
-		outputFields.addAll(rec.outputFields);
+		inputFields.putAll(rec.inputFields);
+		outputFields.putAll(rec.outputFields);
 		if (tSize != typingTexts.size() || cSize != typingConstants.size()
 				|| ifSize != inputFields.size()
 				|| ofSize != outputFields.size()) {
@@ -47,12 +48,21 @@ public class TypingRecord {
 		return false;
 	}
 
+	/**
+	 * Merge typings (and path) to current record.
+	 * 
+	 * @param rec
+	 * @param path
+	 * @return True - changed; False - unchanged.
+	 */
 	public boolean merge(TypingRecord rec, List<Statement> path) {
 		Map<String, List<Statement>> localTexts = typingTexts;
+		Map<SimpleGraphNode, List<Statement>> localInputs = inputFields;
+		Map<SimpleGraphNode, List<Statement>> localOutputs = outputFields;
 		int tSize = localTexts.size();
 		int cSize = typingConstants.size();
-		int ifSize = inputFields.size();
-		int ofSize = outputFields.size();
+		int ifSize = localInputs.size();
+		int ofSize = localOutputs.size();
 		Set<Map.Entry<String, List<Statement>>> set = rec.typingTexts.entrySet();
 		for (Map.Entry<String, List<Statement>> entry : set) {
 			String key = entry.getKey();
@@ -64,11 +74,31 @@ public class TypingRecord {
 			}
 		}
 		typingConstants.addAll(rec.typingConstants);
-		inputFields.addAll(rec.inputFields);
-		outputFields.addAll(rec.outputFields);
+		// input fields
+		Set<Map.Entry<SimpleGraphNode, List<Statement>>> fieldSet = localInputs.entrySet();
+		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
+			SimpleGraphNode key = entry.getKey();
+			if (!localInputs.containsKey(key)) {
+				List<Statement> list = new LinkedList<Statement>();
+				list.addAll(entry.getValue());
+				list.addAll(path);
+				localInputs.put(key, list);
+			}
+		}
+		// output fields
+		fieldSet = localOutputs.entrySet();
+		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
+			SimpleGraphNode key = entry.getKey();
+			if (!localOutputs.containsKey(key)) {
+				List<Statement> list = new LinkedList<Statement>();
+				list.addAll(entry.getValue());
+				list.addAll(path);
+				localOutputs.put(key, list);
+			}
+		}
 		if (tSize != localTexts.size() || cSize != typingConstants.size()
-				|| ifSize != inputFields.size()
-				|| ofSize != outputFields.size()) {
+				|| ifSize != localInputs.size()
+				|| ofSize != localOutputs.size()) {
 			return true;
 		}
 		return false;
@@ -177,11 +207,25 @@ public class TypingRecord {
 	}
 
 	public boolean addInputField(int nodeId) {
-		return inputFields.add(new SimpleGraphNode(nodeId));
+		SimpleGraphNode sgn = SimpleGraphNode.make(nodeId);
+		Map<SimpleGraphNode, List<Statement>> m = inputFields;
+		if (!m.containsKey(sgn)) {
+			List<Statement> l = new LinkedList<Statement>();
+			m.put(sgn, l);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean addOutputField(int nodeId) {
-		return outputFields.add(new SimpleGraphNode(nodeId));
+		SimpleGraphNode sgn = SimpleGraphNode.make(nodeId);
+		Map<SimpleGraphNode, List<Statement>> m = outputFields;
+		if (!m.containsKey(sgn)) {
+			List<Statement> l = new LinkedList<Statement>();
+			m.put(sgn, l);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean addForwardTypingConstraint(TypingConstraint c) {
@@ -229,11 +273,11 @@ public class TypingRecord {
 		return typingConstants;
 	}
 
-	public Set<SimpleGraphNode> getInputFields() {
+	public Map<SimpleGraphNode, List<Statement>> getInputFields() {
 		return inputFields;
 	}
 
-	public Set<SimpleGraphNode> getOutputFields() {
+	public Map<SimpleGraphNode, List<Statement>> getOutputFields() {
 		return outputFields;
 	}
 }
