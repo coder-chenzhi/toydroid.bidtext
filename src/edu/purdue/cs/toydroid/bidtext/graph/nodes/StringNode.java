@@ -40,8 +40,10 @@ public class StringNode {
 	public boolean equals(Object obj) {
 		if (obj instanceof StringNode) {
 			StringNode that = (StringNode) obj;
-			if (string != null && string.equals(that.string)
-					&& fPath.equals(that.fPath) && bPath.equals(that.bPath)) {
+			// eliminate duplicate strings, even they are propagated from
+			// different paths
+			if ((string == null && that.string == null)
+					|| (string != null && string.equals(that.string))) {
 				return true;
 			}
 		}
@@ -49,7 +51,6 @@ public class StringNode {
 	}
 
 	public int hashCode() {
-		return string != null ? (string.hashCode() + fPath.hashCode() * 7 + bPath.hashCode() * 11)
-				: (fPath.hashCode() + bPath.hashCode() * 7);
+		return string != null ? string.hashCode() : 0;
 	}
 }
