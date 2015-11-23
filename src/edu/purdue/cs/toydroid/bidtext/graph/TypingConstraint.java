@@ -15,8 +15,8 @@ public class TypingConstraint {
 	public static final int GE_APPEND = 0x18;
 
 	public int lhs, rhs, sym;
-	
-	private List<Statement> path;//propagation path
+
+	private List<Statement> path;// propagation path
 
 	public TypingConstraint(int l, int s, int r) {
 		lhs = l;
@@ -24,13 +24,17 @@ public class TypingConstraint {
 		rhs = r;
 		path = new LinkedList<Statement>();
 	}
-	
+
 	public boolean addPath(Statement stmt) {
 		return path.add(stmt);
 	}
-	
+
 	public Iterator<Statement> iteratePath() {
 		return path.iterator();
+	}
+
+	public List<Statement> getPath() {
+		return path;
 	}
 
 	public boolean equals(Object o) {
