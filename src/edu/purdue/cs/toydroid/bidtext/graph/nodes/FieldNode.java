@@ -40,15 +40,12 @@ public class FieldNode {
 	public boolean equals(Object obj) {
 		if (obj instanceof FieldNode) {
 			FieldNode that = (FieldNode) obj;
-			if (field == that.field && fPath.equals(that.fPath)
-					&& bPath.equals(that.bPath)) {
-				return true;
-			}
+			return field == that.field;
 		}
 		return false;
 	}
 
 	public int hashCode() {
-		return (field + fPath.hashCode() * 7 + bPath.hashCode() * 11);
+		return field;
 	}
 }
