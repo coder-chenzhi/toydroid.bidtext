@@ -2,6 +2,8 @@ package edu.purdue.cs.toydroid.bidtext.graph;
 
 import java.util.*;
 
+import com.ibm.wala.ipa.slicer.Statement;
+
 public class TypingRecord {
 	public static final String APPEND_PREFIX = "{[<";
 	public static final String APPEND_POSTFIX = ">]}";

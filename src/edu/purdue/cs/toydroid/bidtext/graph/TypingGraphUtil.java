@@ -340,6 +340,8 @@ public class TypingGraphUtil {
 	/************************************************************/
 	/************** Handle Specific WALA Statement **************/
 	/************************************************************/
+	private static Statement cachedStmt = null;
+
 	private static void handlePhi(CallGraph cg, Graph<Statement> sdg,
 			Statement stmt) {
 		CGNode cgNode = stmt.getNode();
@@ -386,6 +388,9 @@ public class TypingGraphUtil {
 		} else if (inst instanceof SSAReturnInstruction) {
 			newCachedNode = handleSSAReturn(cgNode, nstmt,
 					(SSAReturnInstruction) inst, sg);
+			if (!((SSAReturnInstruction) inst).isReturnVoid()) {
+				cachedStmt = stmt;
+			}
 		} else if (inst instanceof SSAInstanceofInstruction) {
 			handleSSAInstanceof(cgNode, nstmt, (SSAInstanceofInstruction) inst,
 					sg);
@@ -418,6 +423,7 @@ public class TypingGraphUtil {
 			int pv = pcstmt.getValueNumber();// recorded for later use in param
 												// callee
 			newCachedNode = sg.findOrCreate(pv);
+			cachedStmt = stmt;
 		}
 		return newCachedNode;
 	}
@@ -437,16 +443,17 @@ public class TypingGraphUtil {
 			int pv = pcstmt.getValueNumber();
 			TypingNode paramNode = sg.findOrCreate(pv);
 			// currentTypingGraph.mergeClass(cachedNode, paramNode);
-			TypingRecord rec = sg.typingGraph.getTypingRecord(cachedNode.getGraphNodeId());
-			if (rec == null) {
-				rec = sg.typingGraph.findOrCreateTypingRecord(paramNode.getGraphNodeId());
-				currentTypingGraph.setTypingRecord(cachedNode.getGraphNodeId(),
-						rec);
-			} else {
-				currentTypingGraph.setTypingRecord(paramNode.getGraphNodeId(),
-						rec);
-			}
-
+			TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(cachedNode.getGraphNodeId());
+			TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(paramNode.getGraphNodeId());
+			TypingConstraint c = new TypingConstraint(
+					paramNode.getGraphNodeId(), TypingConstraint.EQ,
+					cachedNode.getGraphNodeId());
+			if (cachedStmt != null)
+				c.addPath(cachedStmt);
+			c.addPath(stmt);
+			orec.addForwardTypingConstraint(c);
+			nrec.addBackwardTypingConstraint(c);
+			cachedStmt = null;
 		}
 	}
 
@@ -465,15 +472,17 @@ public class TypingGraphUtil {
 				int ret = nrc.getValueNumber();
 				TypingNode retNode = sg.findOrCreate(ret);
 				// currentTypingGraph.mergeClass(cachedNode, retNode);
-				TypingRecord rec = currentTypingGraph.getTypingRecord(cachedNode.getGraphNodeId());
-				if (rec == null) {
-					rec = currentTypingGraph.findOrCreateTypingRecord(retNode.getGraphNodeId());
-					currentTypingGraph.setTypingRecord(
-							cachedNode.getGraphNodeId(), rec);
-				} else {
-					currentTypingGraph.setTypingRecord(
-							retNode.getGraphNodeId(), rec);
-				}
+				TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(cachedNode.getGraphNodeId());
+				TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(retNode.getGraphNodeId());
+				TypingConstraint c = new TypingConstraint(
+						retNode.getGraphNodeId(), TypingConstraint.EQ,
+						cachedNode.getGraphNodeId());
+				if (cachedStmt != null) 
+					c.addPath(cachedStmt);
+				c.addPath(stmt);
+				orec.addForwardTypingConstraint(c);
+				nrec.addBackwardTypingConstraint(c);
+				cachedStmt = null;
 			}
 		}
 	}
