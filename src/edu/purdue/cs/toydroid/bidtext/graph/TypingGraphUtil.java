@@ -598,7 +598,7 @@ public class TypingGraphUtil {
 						cachedNode.getGraphNodeId());
 				c.addPath(stmt);
 				orec.addForwardTypingConstraint(c);
-				nrec.addForwardTypingConstraint(c);
+				nrec.addBackwardTypingConstraint(c);
 			}
 		} else {
 			// some incoming field access from other entrypoint scope
@@ -616,7 +616,7 @@ public class TypingGraphUtil {
 					TypingConstraint.EQ, refNode.getGraphNodeId());
 			c.addPath(stmt);
 			orec.addForwardTypingConstraint(c);
-			nrec.addForwardTypingConstraint(c);
+			nrec.addBackwardTypingConstraint(c);
 
 			currentTypingGraph.setPossibleExternalInput(refNode.getGraphNodeId());
 			ssaGet2Nodes.put(inst, refNode);
@@ -637,7 +637,7 @@ public class TypingGraphUtil {
 				TypingConstraint.EQ, retNode.getGraphNodeId());
 		c.addPath(stmt);
 		orec.addForwardTypingConstraint(c);
-		nrec.addForwardTypingConstraint(c);
+		nrec.addBackwardTypingConstraint(c);
 	}
 
 	private static void handleSSANew(CGNode cgNode, NormalStatement stmt,
@@ -660,7 +660,7 @@ public class TypingGraphUtil {
 				TypingConstraint.EQ, refNode.getGraphNodeId());
 		c.addPath(stmt);
 		orec.addForwardTypingConstraint(c);
-		nrec.addForwardTypingConstraint(c);
+		nrec.addBackwardTypingConstraint(c);
 	}
 
 	private static void handleSSAArrayStore(CGNode cgNode,
@@ -677,7 +677,7 @@ public class TypingGraphUtil {
 				TypingConstraint.EQ, valNode.getGraphNodeId());
 		c.addPath(stmt);
 		orec.addForwardTypingConstraint(c);
-		nrec.addForwardTypingConstraint(c);
+		nrec.addBackwardTypingConstraint(c);
 	}
 
 	private static TypingNode handleSSAReturn(CGNode cgNode,
@@ -723,6 +723,8 @@ public class TypingGraphUtil {
 		defRec.addBackwardTypingConstraint(c1);
 		use0Rec.addForwardTypingConstraint(c0);
 		use1Rec.addForwardTypingConstraint(c1);
+		c0.addPath(stmt);
+		c1.addPath(stmt);
 	}
 
 	private static void handleSSAInvokeAPI(CGNode cgNode, Statement stmt,
