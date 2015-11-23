@@ -41,8 +41,8 @@ public class ConstantNode {
 	public boolean equals(Object obj) {
 		if (obj instanceof ConstantNode) {
 			ConstantNode that = (ConstantNode) obj;
-			if (constant != null && constant.equals(that.constant)
-					&& fPath.equals(that.fPath) && bPath.equals(that.bPath)) {
+			if ((constant == null && that.constant == null)
+					|| (constant != null && constant.equals(that.constant))) {
 				return true;
 			}
 		}
@@ -50,7 +50,6 @@ public class ConstantNode {
 	}
 
 	public int hashCode() {
-		return constant != null ? (constant.hashCode() + fPath.hashCode() * 7 + bPath.hashCode() * 11)
-				: (fPath.hashCode() + bPath.hashCode() * 7);
+		return constant != null ? (constant.hashCode()) : 0;
 	}
 }
