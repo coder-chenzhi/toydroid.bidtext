@@ -444,6 +444,7 @@ public class TypingGraphUtil {
 			c.addPath(stmt);
 			orec.addForwardTypingConstraint(c);
 			nrec.addBackwardTypingConstraint(c);
+			cachedStmt = null;
 		}
 	}
 
