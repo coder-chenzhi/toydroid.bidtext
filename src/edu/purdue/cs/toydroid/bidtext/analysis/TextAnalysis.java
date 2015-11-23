@@ -213,6 +213,7 @@ public class TextAnalysis {
 				}
 			} else if (containsKeywords(str.toLowerCase())) {
 				f.add(str);
+				toRemove.add(str);
 			}
 		}
 		texts.removeAll(toRemove);
