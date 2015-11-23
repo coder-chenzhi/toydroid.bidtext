@@ -819,12 +819,14 @@ public class TypingGraphUtil {
 					TypingConstraint c = new TypingConstraint(
 							thisNode.getGraphNodeId(), apiConstraint,
 							pNode.getGraphNodeId());
+					c.addPath(stmt);
 					pRec.addForwardTypingConstraint(c);
 					thisRec.addBackwardTypingConstraint(c);
 				} else if (defRec != null) {
 					TypingConstraint c = new TypingConstraint(
 							defNode.getGraphNodeId(), apiConstraint,
 							pNode.getGraphNodeId());
+					c.addPath(stmt);
 					pRec.addForwardTypingConstraint(c);
 					defRec.addBackwardTypingConstraint(c);
 				}
@@ -838,11 +840,13 @@ public class TypingGraphUtil {
 					TypingConstraint c = new TypingConstraint(
 							thisNode.getGraphNodeId(), TypingConstraint.GE,
 							cNode.getGraphNodeId());
+					c.addPath(stmt);
 					cRec.addForwardTypingConstraint(c);
 				} else if (defRec != null) {
 					TypingConstraint c = new TypingConstraint(
 							defNode.getGraphNodeId(), TypingConstraint.GE,
 							cNode.getGraphNodeId());
+					c.addPath(stmt);
 					cRec.addForwardTypingConstraint(c);
 					// defRec.addBackwardTypingConstraint(c);
 				}
@@ -851,6 +855,7 @@ public class TypingGraphUtil {
 		if (thisRec != null && defRec != null && apiType != 2) {
 			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
 					apiConstraint, thisNode.getGraphNodeId());
+			c.addPath(stmt);
 			thisRec.addForwardTypingConstraint(c);
 			// if (apiConstraint != TypingConstraint.GE_UNIDIR)
 			defRec.addBackwardTypingConstraint(c);
