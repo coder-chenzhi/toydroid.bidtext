@@ -474,7 +474,7 @@ public class TypingGraphUtil {
 				TypingConstraint c = new TypingConstraint(
 						retNode.getGraphNodeId(), TypingConstraint.EQ,
 						cachedNode.getGraphNodeId());
-				if (cachedStmt != null) 
+				if (cachedStmt != null)
 					c.addPath(cachedStmt);
 				c.addPath(stmt);
 				orec.addForwardTypingConstraint(c);
@@ -546,13 +546,13 @@ public class TypingGraphUtil {
 			refNode = sg.createInstanceFieldNode(ref, inst.getDeclaredField());
 		}
 		// currentTypingGraph.mergeClass(valNode, refNode);
-		TypingRecord rec = currentTypingGraph.getTypingRecord(valNode.getGraphNodeId());
-		if (rec == null) {
-			rec = currentTypingGraph.findOrCreateTypingRecord(refNode.getGraphNodeId());
-			currentTypingGraph.setTypingRecord(valNode.getGraphNodeId(), rec);
-		} else {
-			currentTypingGraph.setTypingRecord(refNode.getGraphNodeId(), rec);
-		}
+		TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(valNode.getGraphNodeId());
+		TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(refNode.getGraphNodeId());
+		TypingConstraint c = new TypingConstraint(refNode.getGraphNodeId(),
+				TypingConstraint.EQ, valNode.getGraphNodeId());
+		c.addPath(stmt);
+		orec.addForwardTypingConstraint(c);
+		nrec.addBackwardTypingConstraint(c);
 
 		currentTypingGraph.collectOutgoingField(refNode);
 		return refNode;
