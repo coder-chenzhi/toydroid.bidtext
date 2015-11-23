@@ -363,28 +363,34 @@ public class TypingGraphUtil {
 		SSAInstruction inst = nstmt.getInstruction();
 
 		if (inst instanceof SSAPutInstruction) {
-			newCachedNode = handleSSAPut(cgNode, (SSAPutInstruction) inst, sg);
+			newCachedNode = handleSSAPut(cgNode, nstmt,
+					(SSAPutInstruction) inst, sg);
 			// System.err.println("SSAPut: " + inst + " \n\t [" + newCachedNode
 			// + "]");
 		} else if (inst instanceof SSAGetInstruction) {
 			// System.err.println("SSAGet: " + inst + " \n\t [" + cachedNode +
 			// "]");
-			handleSSAGet(cgNode, (SSAGetInstruction) inst, sg, cachedNode);
+			handleSSAGet(cgNode, nstmt, (SSAGetInstruction) inst, sg,
+					cachedNode);
 		} else if (inst instanceof SSACheckCastInstruction) {
-			handleSSACheckCast(cgNode, (SSACheckCastInstruction) inst, sg);
+			handleSSACheckCast(cgNode, nstmt, (SSACheckCastInstruction) inst,
+					sg);
 		} else if (inst instanceof SSANewInstruction) {
-			handleSSANew(cgNode, (SSANewInstruction) inst, sg);
+			handleSSANew(cgNode, nstmt, (SSANewInstruction) inst, sg);
 		} else if (inst instanceof SSAArrayLoadInstruction) {
-			handleSSAArrayLoad(cgNode, (SSAArrayLoadInstruction) inst, sg);
+			handleSSAArrayLoad(cgNode, nstmt, (SSAArrayLoadInstruction) inst,
+					sg);
 		} else if (inst instanceof SSAArrayStoreInstruction) {
-			handleSSAArrayStore(cgNode, (SSAArrayStoreInstruction) inst, sg);
+			handleSSAArrayStore(cgNode, nstmt, (SSAArrayStoreInstruction) inst,
+					sg);
 		} else if (inst instanceof SSAReturnInstruction) {
-			newCachedNode = handleSSAReturn(cgNode,
+			newCachedNode = handleSSAReturn(cgNode, nstmt,
 					(SSAReturnInstruction) inst, sg);
 		} else if (inst instanceof SSAInstanceofInstruction) {
-			handleSSAInstanceof(cgNode, (SSAInstanceofInstruction) inst, sg);
+			handleSSAInstanceof(cgNode, nstmt, (SSAInstanceofInstruction) inst,
+					sg);
 		} else if (inst instanceof SSABinaryOpInstruction) {
-			handleSSABinaryOp(cgNode, (SSABinaryOpInstruction) inst, sg);
+			handleSSABinaryOp(cgNode, nstmt, (SSABinaryOpInstruction) inst, sg);
 		} else if (!(inst instanceof SSAAbstractInvokeInstruction)) {
 			// System.err.println("Unrecognized Normal Stmt: " + stmt);
 		} // invoke is ignored.
@@ -405,7 +411,7 @@ public class TypingGraphUtil {
 			SSAAbstractInvokeInstruction inst = pcstmt.getInstruction();
 			if (!inst.hasDef()) {
 				AnalysisUtil.associateLayout2Activity(inst, cgNode);
-				handleSSAInvokeAPI(cgNode, inst, sg);
+				handleSSAInvokeAPI(cgNode, stmt, inst, sg);
 			}
 			// hasDef(): left to be processed in NormalRetCaller?
 		} else { // local call
@@ -450,7 +456,7 @@ public class TypingGraphUtil {
 		CGNode cgNode = nrc.getNode();
 		TypingSubGraph sg = currentTypingGraph.findOrCreateSubGraph(cgNode);
 		if (sdg.getPredNodeCount(stmt) == 0) {// API call?
-			handleSSAInvokeAPI(cgNode, nrc.getInstruction(), sg);
+			handleSSAInvokeAPI(cgNode, stmt, nrc.getInstruction(), sg);
 		} else if (nrc.getInstruction().hasDef()) {
 			if (cachedNode == null) {
 				System.err.println("No Return Object is found for NormalRetCaller: "
@@ -520,7 +526,7 @@ public class TypingGraphUtil {
 	/************************************************************/
 	/************* Handle Specific SSA Instructions *************/
 	/************************************************************/
-	private static TypingNode handleSSAPut(CGNode cgNode,
+	private static TypingNode handleSSAPut(CGNode cgNode, NormalStatement stmt,
 			SSAPutInstruction inst, TypingSubGraph sg) {
 		int val = inst.getVal(); // rhs
 		int ref;
@@ -546,8 +552,8 @@ public class TypingGraphUtil {
 		return refNode;
 	}
 
-	private static void handleSSAGet(CGNode cgNode, SSAGetInstruction inst,
-			TypingSubGraph sg, TypingNode cachedNode) {
+	private static void handleSSAGet(CGNode cgNode, NormalStatement stmt,
+			SSAGetInstruction inst, TypingSubGraph sg, TypingNode cachedNode) {
 		// if (inst.getDeclaredField()
 		// .getName().toString().equals("userMessageForWeb"))
 		// return;
@@ -615,7 +621,7 @@ public class TypingGraphUtil {
 		}
 	}
 
-	private static void handleSSACheckCast(CGNode cgNode,
+	private static void handleSSACheckCast(CGNode cgNode, NormalStatement stmt,
 			SSACheckCastInstruction inst, TypingSubGraph sg) {
 		int val = inst.getVal(); // rhs
 		int ret = inst.getResult(); // lhs
@@ -632,14 +638,14 @@ public class TypingGraphUtil {
 		}
 	}
 
-	private static void handleSSANew(CGNode cgNode, SSANewInstruction inst,
-			TypingSubGraph sg) {
+	private static void handleSSANew(CGNode cgNode, NormalStatement stmt,
+			SSANewInstruction inst, TypingSubGraph sg) {
 		int def = inst.getDef();
 		TypingNode defNode = sg.findOrCreate(def);
 		defNode.joke();
 	}
 
-	private static void handleSSAArrayLoad(CGNode cgNode,
+	private static void handleSSAArrayLoad(CGNode cgNode, NormalStatement stmt,
 			SSAArrayLoadInstruction inst, TypingSubGraph sg) {
 		int ref = inst.getArrayRef(); // rhs
 		int def = inst.getDef(); // lhs
@@ -656,7 +662,8 @@ public class TypingGraphUtil {
 	}
 
 	private static void handleSSAArrayStore(CGNode cgNode,
-			SSAArrayStoreInstruction inst, TypingSubGraph sg) {
+			NormalStatement stmt, SSAArrayStoreInstruction inst,
+			TypingSubGraph sg) {
 		int ref = inst.getArrayRef(); // lhs
 		int val = inst.getValue(); // rhs
 		TypingNode refNode = sg.findOrCreate(ref);
@@ -672,7 +679,7 @@ public class TypingGraphUtil {
 	}
 
 	private static TypingNode handleSSAReturn(CGNode cgNode,
-			SSAReturnInstruction inst, TypingSubGraph sg) {
+			NormalStatement stmt, SSAReturnInstruction inst, TypingSubGraph sg) {
 		TypingNode retNode = null;
 		if (!inst.returnsVoid()) {
 			int ret = inst.getResult();
@@ -682,7 +689,8 @@ public class TypingGraphUtil {
 	}
 
 	private static void handleSSAInstanceof(CGNode cgNode,
-			SSAInstanceofInstruction inst, TypingSubGraph sg) {
+			NormalStatement stmt, SSAInstanceofInstruction inst,
+			TypingSubGraph sg) {
 		int ref = inst.getRef();
 		int def = inst.getDef();
 		TypingNode refNode = sg.findOrCreate(ref);
@@ -691,7 +699,7 @@ public class TypingGraphUtil {
 		// TODO: same as "a = b"?
 	}
 
-	private static void handleSSABinaryOp(CGNode cgNode,
+	private static void handleSSABinaryOp(CGNode cgNode, NormalStatement stmt,
 			SSABinaryOpInstruction inst, TypingSubGraph sg) {
 		int def = inst.getDef();
 		int use0 = inst.getUse(0);
@@ -714,7 +722,7 @@ public class TypingGraphUtil {
 		use1Rec.addForwardTypingConstraint(c1);
 	}
 
-	private static void handleSSAInvokeAPI(CGNode cgNode,
+	private static void handleSSAInvokeAPI(CGNode cgNode, Statement stmt,
 			SSAAbstractInvokeInstruction inst, TypingSubGraph sg) {
 		int apiType = AnalysisUtil.tryRecordInterestingNode(inst, sg, cha);
 
@@ -1205,14 +1213,14 @@ public class TypingGraphUtil {
 			Iterator<String> appendIter = rec.iteratorAppendResults();
 			while (appendIter.hasNext()) {
 				String str = appendIter.next();
-				//System.err.println(tn.getGraphNodeId() + "  >> "+str);
+				// System.err.println(tn.getGraphNodeId() + "  >> "+str);
 				if (str.startsWith("http:") || str.startsWith("https:")) {
 					str = str.substring(5);
 				}
 				Matcher matcher = NameValuePattern.matcher(str);
 				while (matcher.find()) {
-//					System.err.println(matcher.groupCount() + "  "
-//							+ matcher.group(1));
+					// System.err.println(matcher.groupCount() + "  "
+					// + matcher.group(1));
 					String matched = matcher.group(1);
 					int vStartIdx = matched.indexOf(TypingRecord.APPEND_VAR_PREFIX);
 					String varStr = matched.substring(
