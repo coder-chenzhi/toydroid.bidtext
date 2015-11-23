@@ -388,9 +388,6 @@ public class TypingGraphUtil {
 		} else if (inst instanceof SSAReturnInstruction) {
 			newCachedNode = handleSSAReturn(cgNode, nstmt,
 					(SSAReturnInstruction) inst, sg);
-			if (!((SSAReturnInstruction) inst).isReturnVoid()) {
-				cachedStmt = stmt;
-			}
 		} else if (inst instanceof SSAInstanceofInstruction) {
 			handleSSAInstanceof(cgNode, nstmt, (SSAInstanceofInstruction) inst,
 					sg);
@@ -693,6 +690,7 @@ public class TypingGraphUtil {
 		if (!inst.returnsVoid()) {
 			int ret = inst.getResult();
 			retNode = sg.findOrCreate(ret);
+			cachedStmt = stmt;
 		}
 		return retNode;
 	}
