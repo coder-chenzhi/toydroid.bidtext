@@ -591,16 +591,14 @@ public class TypingGraphUtil {
 				currentTypingGraph.unsetPossibleExternalInput(prevNode.getGraphNodeId());
 			} else {
 				// currentTypingGraph.mergeClass(cachedNode, defNode);
-				TypingRecord rec = currentTypingGraph.getTypingRecord(cachedNode.getGraphNodeId());
-				if (rec == null) {
-					rec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
-					currentTypingGraph.setTypingRecord(
-							cachedNode.getGraphNodeId(), rec);
-				} else {
-					currentTypingGraph.setTypingRecord(
-							defNode.getGraphNodeId(), rec);
-				}
-
+				TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(cachedNode.getGraphNodeId());
+				TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
+				TypingConstraint c = new TypingConstraint(
+						defNode.getGraphNodeId(), TypingConstraint.EQ,
+						cachedNode.getGraphNodeId());
+				c.addPath(stmt);
+				orec.addForwardTypingConstraint(c);
+				nrec.addForwardTypingConstraint(c);
 			}
 		} else {
 			// some incoming field access from other entrypoint scope
@@ -612,15 +610,13 @@ public class TypingGraphUtil {
 						inst.getDeclaredField());
 			}
 			// currentTypingGraph.mergeClass(refNode, defNode);
-			TypingRecord rec = currentTypingGraph.getTypingRecord(refNode.getGraphNodeId());
-			if (rec == null) {
-				rec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
-				currentTypingGraph.setTypingRecord(refNode.getGraphNodeId(),
-						rec);
-			} else {
-				currentTypingGraph.setTypingRecord(defNode.getGraphNodeId(),
-						rec);
-			}
+			TypingRecord orec = currentTypingGraph.findOrCreateTypingRecord(refNode.getGraphNodeId());
+			TypingRecord nrec = currentTypingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
+			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
+					TypingConstraint.EQ, refNode.getGraphNodeId());
+			c.addPath(stmt);
+			orec.addForwardTypingConstraint(c);
+			nrec.addForwardTypingConstraint(c);
 
 			currentTypingGraph.setPossibleExternalInput(refNode.getGraphNodeId());
 			ssaGet2Nodes.put(inst, refNode);
