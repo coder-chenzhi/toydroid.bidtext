@@ -64,6 +64,7 @@ public class ResourceUtil {
 	private static Set<String> layouts;
 	private static Map<Integer, Map<String, String>> stringId2Value;
 	private static Map<Integer, String> layout2Text;
+	private static Map<Integer, Set<Integer>> widget2Layout;
 
 	public static String getPackageName() {
 		return packageName;
@@ -79,6 +80,10 @@ public class ResourceUtil {
 
 	public static String getLayoutText(Integer id) {
 		return layout2Text == null ? null : layout2Text.get(id);
+	}
+
+	public static Set<Integer> getLayouts(Integer widgetId) {
+		return widget2Layout == null ? null : widget2Layout.get(widgetId);
 	}
 
 	public static Map<String, String> stringValues(int id) {
@@ -260,6 +265,7 @@ public class ResourceUtil {
 			}
 		}
 		layout2Text = new HashMap<Integer, String>();
+		widget2Layout = new HashMap<Integer, Set<Integer>>();
 		Set<Map.Entry<String, ZipEntry>> entrySet = layoutEntries.entrySet();
 		for (Map.Entry<String, ZipEntry> entry : entrySet) {
 			String name = entry.getKey();
@@ -315,6 +321,15 @@ public class ResourceUtil {
 				tagName = clazz;
 			}
 		}
+		int widgetId = getAttributeId(parser, "id");
+		Integer layoutId = resolveIdForFullLayoutName(xmlFile);
+		Set<Integer> correspondingLayouts = widget2Layout.get(widgetId);
+		if (correspondingLayouts == null) {
+			correspondingLayouts = new HashSet<Integer>();
+			widget2Layout.put(widgetId, correspondingLayouts);
+		}
+		correspondingLayouts.add(layoutId);
+
 		String className;
 		ClassLoaderReference ref;
 		if (!tagName.contains(".")) {
@@ -341,7 +356,7 @@ public class ResourceUtil {
 				if (hint != null) {
 					builder.append(hint);
 					builder.append('\n');
-					//Stat.addNConstInLayout();
+					// Stat.addNConstInLayout();
 				}
 			} else if (cha.isSubclassOf(clazz, classTextView)) {
 				text = getAttributeText(parser, "text");
@@ -349,7 +364,7 @@ public class ResourceUtil {
 			if (text != null) {
 				builder.append(text);
 				builder.append('\n');
-				//Stat.addNConstInLayout();
+				// Stat.addNConstInLayout();
 			}
 		}
 	}
@@ -361,6 +376,16 @@ public class ResourceUtil {
 
 	private static boolean recordedLayout(String layoutFile) {
 		return (layouts != null && layouts.contains(layoutFile));
+	}
+
+	private static int getAttributeId(AXmlResourceParser parser, String attr) {
+		for (int i = 0; i < parser.getAttributeCount(); i++) {
+			String attrName = parser.getAttributeName(i);
+			if (attrName.equals(attr)) {
+				return parser.getAttributeResourceValue(i, 0);
+			}
+		}
+		return 0;
 	}
 
 	private static String getAttributeText(AXmlResourceParser parser,
