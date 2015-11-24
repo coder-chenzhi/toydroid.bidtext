@@ -447,11 +447,19 @@ public class TypingGraphUtil {
 			TypingConstraint c = new TypingConstraint(
 					paramNode.getGraphNodeId(), TypingConstraint.EQ,
 					cachedNode.getGraphNodeId());
-			if (cachedStmt != null)
+			TypingConstraint bc = c;
+			if (cachedStmt != null) {
 				c.addPath(cachedStmt);
+				bc = new TypingConstraint(
+						paramNode.getGraphNodeId(), TypingConstraint.EQ,
+						cachedNode.getGraphNodeId());
+				// reverse the path for backward propagation
+				bc.addPath(stmt);
+				bc.addPath(cachedStmt);
+			}
 			c.addPath(stmt);
 			orec.addForwardTypingConstraint(c);
-			nrec.addBackwardTypingConstraint(c);
+			nrec.addBackwardTypingConstraint(bc);
 			cachedStmt = null;
 		}
 	}
@@ -476,11 +484,18 @@ public class TypingGraphUtil {
 				TypingConstraint c = new TypingConstraint(
 						retNode.getGraphNodeId(), TypingConstraint.EQ,
 						cachedNode.getGraphNodeId());
-				if (cachedStmt != null)
+				TypingConstraint bc = c;
+				if (cachedStmt != null) {
 					c.addPath(cachedStmt);
+					bc = new TypingConstraint(
+							retNode.getGraphNodeId(), TypingConstraint.EQ,
+							cachedNode.getGraphNodeId());
+					bc.addPath(stmt);
+					bc.addPath(cachedStmt);
+				}
 				c.addPath(stmt);
 				orec.addForwardTypingConstraint(c);
-				nrec.addBackwardTypingConstraint(c);
+				nrec.addBackwardTypingConstraint(bc);
 				cachedStmt = null;
 			}
 		}
