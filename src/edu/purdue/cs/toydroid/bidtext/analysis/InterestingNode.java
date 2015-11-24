@@ -73,4 +73,8 @@ public class InterestingNode {
 		}
 		return false;
 	}
+
+	public String instruction() {
+		return instr.toString();
+	}
 }

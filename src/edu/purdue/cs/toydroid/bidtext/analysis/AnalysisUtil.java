@@ -320,6 +320,10 @@ public class AnalysisUtil {
 					writer.write(stmt.toString());
 					writer.newLine();
 				}
+				writer.write("[[ ");
+				writer.write(sink.instruction());
+				writer.write(" ]]");
+				writer.newLine();
 				writer.flush();
 			} catch (IOException e) {
 
