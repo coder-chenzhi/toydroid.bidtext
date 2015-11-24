@@ -1,6 +1,7 @@
 package edu.purdue.cs.toydroid.bidtext.analysis;
 
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,6 +12,8 @@ import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.ibm.wala.ipa.slicer.Statement;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
@@ -37,55 +40,57 @@ public class TextAnalysis {
 	public String tag;
 	private StringBuilder tagBuilder;
 	private boolean isGUIText;
+	private Map<String, List<Statement>> text2Path;
 
 	public TextAnalysis() {
+		text2Path = new HashMap<String, List<Statement>>();
 	}
 
-	public String analyze(Set<String> texts, boolean isGUIText) {
+	public String analyze(Map<String, List<Statement>> texts, boolean isGUIText) {
 		this.isGUIText = isGUIText;
 		tagBuilder = new StringBuilder();
 		if (!isGUIText) {
-			if (texts.contains("location")) {
-				texts.remove("location");
-				if (texts.contains("gps")) {
-					texts.remove("gps");
+			if (texts.containsKey("location")) {
+				text2Path.put("location", texts.remove("location"));
+				if (texts.containsKey("gps")) {
+					text2Path.put("gps", texts.remove("gps"));
 					record("location/gps");
 				}
-				if (texts.contains("network")) {
-					texts.remove("network");
+				if (texts.containsKey("network")) {
+					text2Path.put("network", texts.remove("network"));
 					record("location/network");
 				}
 			}
-			if (texts.contains("latitude")) {
-				texts.remove("latitude");
+			if (texts.containsKey("latitude")) {
+				text2Path.put("latitude", texts.remove("latitude"));
 				record("latitude");
 			}
-			if (texts.contains("longitude")) {
-				texts.remove("longitude");
+			if (texts.containsKey("longitude")) {
+				text2Path.put("longitude", texts.remove("longitude"));
 				record("longitude");
 			}
-			if (texts.contains("lat")) {
-				texts.remove("lat");
+			if (texts.containsKey("lat")) {
+				text2Path.put("lat", texts.remove("lat"));
 				record("lat");
-				if (texts.contains("lng")) {
-					texts.remove("lng");
+				if (texts.containsKey("lng")) {
+					text2Path.put("lng", texts.remove("lng"));
 					record("lng");
-				} else if (texts.contains("long")) {
-					texts.remove("long");
+				} else if (texts.containsKey("long")) {
+					text2Path.put("long", texts.remove("long"));
 					record("long");
-				} else if (texts.contains("lon")) {
-					texts.remove("lon");
+				} else if (texts.containsKey("lon")) {
+					text2Path.put("lon", texts.remove("lon"));
 					record("lon");
 				}
 			}
-			if (texts.contains("android_id")) {
-				texts.remove("android_id");
+			if (texts.containsKey("android_id")) {
+				text2Path.put("android_id", texts.remove("android_id"));
 				record("android_id");
 			}
 		}
 		List<String> f = purify(texts);
 		// logger.debug("  {}", f.toString());
-		check(f);
+		check(f, texts);
 		return tagBuilder.toString();
 	}
 
@@ -98,7 +103,7 @@ public class TextAnalysis {
 		return builder.toString().trim();
 	}
 
-	private void check(List<String> f) {
+	private void check(List<String> f, Map<String, List<Statement>> texts) {
 		if (f.isEmpty())
 			return;
 		if (lexParser == null) {
@@ -108,6 +113,7 @@ public class TextAnalysis {
 		TreebankLanguagePack tlp = lp.getOp().langpack();
 		GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
 		for (String s : f) {
+			String origStr = s;
 			// Tokenizer<? extends HasWord> toke = tlp.getTokenizerFactory()
 			// .getTokenizer(new StringReader(s));
 			// List<? extends HasWord> sentence = toke.tokenize();
@@ -130,6 +136,7 @@ public class TextAnalysis {
 				// if not a sentence
 				if (!l.value().equals("S")) {
 					record(s);
+					text2Path.put(origStr, texts.get(origStr));
 				} else {
 					int negIdx = 0;
 					for (TypedDependency td : tdl) {
@@ -158,10 +165,12 @@ public class TextAnalysis {
 										s);
 							} else {
 								record(s);
+								text2Path.put(origStr, texts.get(origStr));
 							}
 						}
 					} else {
 						record(s);
+						text2Path.put(origStr, texts.get(origStr));
 					}
 				}
 			}
@@ -178,10 +187,13 @@ public class TextAnalysis {
 		tagBuilder.append("]");
 	}
 
-	private List<String> purify(Set<String> texts) {
+	private List<String> purify(Map<String, List<Statement>> texts) {
 		List<String> f = new LinkedList<String>();
 		Set<String> toRemove = new HashSet<String>();
-		for (String str : texts) {
+		Set<Map.Entry<String, List<Statement>>> textSet = texts.entrySet();
+		for (Map.Entry<String, List<Statement>> entry : textSet) {
+			String str = entry.getKey();
+			List<Statement> path = entry.getValue();
 			if (str.startsWith("http:") || str.startsWith("https:")
 					|| str.startsWith("/")) {
 				int idx = str.indexOf('?');
@@ -189,12 +201,14 @@ public class TextAnalysis {
 					String s = str.substring(idx + 1);
 					if (containsKeywords(s.toLowerCase())) {
 						record(s);
+						text2Path.put(str, path);
 						toRemove.add(str);
 					}
 				}
 			} else if (str.startsWith("&") && str.endsWith("=")) {
 				if (containsKeywords(str.toLowerCase())) {
 					record(str);
+					text2Path.put(str, path);
 					toRemove.add(str);
 				}
 			} else if (str.length() == 1
@@ -209,6 +223,7 @@ public class TextAnalysis {
 				if (containsKeywords(str)
 						|| containsKeywords(splited.toLowerCase())) {
 					record(str);
+					text2Path.put(str, path);
 					toRemove.add(str);
 				}
 			} else if (containsKeywords(str.toLowerCase())) {
@@ -216,7 +231,9 @@ public class TextAnalysis {
 				toRemove.add(str);
 			}
 		}
-		texts.removeAll(toRemove);
+		for (String s : toRemove) {
+			texts.remove(s);
+		}
 		return f;
 	}
 
@@ -284,11 +301,11 @@ public class TextAnalysis {
 
 	public static void main(String[] args) {
 		TextAnalysis a = new TextAnalysis();
-		Set<String> l = new HashSet<String>();
+		Map<String, List<Statement>> l = new HashMap<String, List<Statement>>();
 		// List<String> l = new LinkedList<String>();
-		l.add("enterPassword.");
-		l.add("include user_id. do not include username. ");
-		l.add(".email");
+		l.put("enterPassword.", null);
+		l.put("include user_id. do not include username. ", null);
+		l.put(".email", null);
 		// a.check(l);
 		a.analyze(l, false);
 		System.out.println(l);
