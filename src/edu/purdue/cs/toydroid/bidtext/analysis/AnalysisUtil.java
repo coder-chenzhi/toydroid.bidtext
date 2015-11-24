@@ -306,6 +306,9 @@ public class AnalysisUtil {
 		for (Map.Entry<String, List<Statement>> entry : pathSet) {
 			String text = entry.getKey();
 			List<Statement> path = entry.getValue();
+			if (path == null || path.isEmpty()) {
+				continue;
+			}
 			try {
 				writer.newLine();
 				writer.newLine();
