@@ -450,9 +450,8 @@ public class TypingGraphUtil {
 			TypingConstraint bc = c;
 			if (cachedStmt != null) {
 				c.addPath(cachedStmt);
-				bc = new TypingConstraint(
-						paramNode.getGraphNodeId(), TypingConstraint.EQ,
-						cachedNode.getGraphNodeId());
+				bc = new TypingConstraint(paramNode.getGraphNodeId(),
+						TypingConstraint.EQ, cachedNode.getGraphNodeId());
 				// reverse the path for backward propagation
 				bc.addPath(stmt);
 				bc.addPath(cachedStmt);
@@ -487,9 +486,8 @@ public class TypingGraphUtil {
 				TypingConstraint bc = c;
 				if (cachedStmt != null) {
 					c.addPath(cachedStmt);
-					bc = new TypingConstraint(
-							retNode.getGraphNodeId(), TypingConstraint.EQ,
-							cachedNode.getGraphNodeId());
+					bc = new TypingConstraint(retNode.getGraphNodeId(),
+							TypingConstraint.EQ, cachedNode.getGraphNodeId());
 					bc.addPath(stmt);
 					bc.addPath(cachedStmt);
 				}
