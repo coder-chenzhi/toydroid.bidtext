@@ -965,7 +965,7 @@ public class TypingGraphUtil {
 			forwardObtainBBsInLine(cfg, worklist, storedBBs);
 			for (ISSABasicBlock bb : storedBBs) {
 				typingGlobalStringInBB(cfg, symTable, bb, potentialGNodes, sg,
-						true);
+						inst, true);
 			}
 			worklist.add(locatedBB);
 			storedBBs.clear();
@@ -973,7 +973,7 @@ public class TypingGraphUtil {
 			storedBBs.remove(locatedBB);
 			for (ISSABasicBlock bb : storedBBs) {
 				typingGlobalStringInBB(cfg, symTable, bb, potentialGNodes, sg,
-						false);
+						inst, false);
 			}
 			worklist = null;
 			storedBBs = null;
@@ -1072,7 +1072,8 @@ public class TypingGraphUtil {
 	// remove support for normal definition stmt; only support branch stmt.
 	private static void typingGlobalStringInBB(SSACFG cfg,
 			SymbolTable symTable, ISSABasicBlock bb,
-			List<TypingNode> potentialGNodes, TypingSubGraph sg, boolean forward) {
+			List<TypingNode> potentialGNodes, TypingSubGraph sg,
+			SSAAbstractInvokeInstruction invoke, boolean forward) {
 		if (forward) {
 			for (int i = bb.getFirstInstructionIndex(); i <= bb.getLastInstructionIndex(); i++) {
 				SSAInstruction inst = cfg.getInstructions()[i];
@@ -1093,7 +1094,7 @@ public class TypingGraphUtil {
 				} else if (inst instanceof SSAConditionalBranchInstruction
 						|| inst instanceof SSASwitchInstruction) {
 					typingGlobalStringInInstruction(symTable, inst,
-							potentialGNodes, sg);
+							potentialGNodes, sg, invoke);
 					break;
 				}
 				// typingGlobalStringInInstruction(symTable, inst,
@@ -1104,7 +1105,7 @@ public class TypingGraphUtil {
 
 	private static void typingGlobalStringInInstruction(SymbolTable symTable,
 			SSAInstruction inst, List<TypingNode> potentialGNodes,
-			TypingSubGraph sg) {
+			TypingSubGraph sg, SSAAbstractInvokeInstruction invoke) {
 		int val = -1, extraVal = -1;
 		if (inst instanceof SSAPutInstruction) {
 			val = ((SSAPutInstruction) inst).getVal();
@@ -1130,6 +1131,33 @@ public class TypingGraphUtil {
 					TypingConstraint c = new TypingConstraint(
 							valNode.getGraphNodeId(), TypingConstraint.GE,
 							n.getGraphNodeId());
+					// a simply way to get the corresponding statement of the
+					// alert inst to act as the path element (I think it usually
+					// fails)
+					Set<TypingConstraint> fc = rec.getForwardTypingConstraints();
+					for (TypingConstraint tc : fc) {
+						List<Statement> path = tc.getPath();
+						boolean found = false;
+						for (Statement p : path) {
+							if (p.getKind() == Statement.Kind.PARAM_CALLER) {
+								ParamCaller pcaller = (ParamCaller) p;
+								if (pcaller.getInstruction().equals(invoke)) {
+									c.addPath(pcaller);
+									found = true;
+									break;
+								}
+							} else if (p.getKind() == Statement.Kind.NORMAL_RET_CALLER) {
+								NormalReturnCaller nrc = (NormalReturnCaller) p;
+								if (nrc.getInstruction().equals(invoke)) {
+									c.addPath(nrc);
+									found = true;
+									break;
+								}
+							}
+						}
+						if (found)
+							break;
+					}
 					rec.addForwardTypingConstraint(c);
 					// valRec.addBackwardTypingConstraint(c);
 				}
@@ -1145,6 +1173,33 @@ public class TypingGraphUtil {
 					TypingConstraint c = new TypingConstraint(
 							extraNode.getGraphNodeId(), TypingConstraint.GE,
 							n.getGraphNodeId());
+					// a simply way to get the corresponding statement of the
+					// alert inst to act as the path element (I think it usually
+					// fails)
+					Set<TypingConstraint> fc = rec.getForwardTypingConstraints();
+					for (TypingConstraint tc : fc) {
+						List<Statement> path = tc.getPath();
+						boolean found = false;
+						for (Statement p : path) {
+							if (p.getKind() == Statement.Kind.PARAM_CALLER) {
+								ParamCaller pcaller = (ParamCaller) p;
+								if (pcaller.getInstruction().equals(invoke)) {
+									c.addPath(pcaller);
+									found = true;
+									break;
+								}
+							} else if (p.getKind() == Statement.Kind.NORMAL_RET_CALLER) {
+								NormalReturnCaller nrc = (NormalReturnCaller) p;
+								if (nrc.getInstruction().equals(invoke)) {
+									c.addPath(nrc);
+									found = true;
+									break;
+								}
+							}
+						}
+						if (found)
+							break;
+					}
 					rec.addForwardTypingConstraint(c);
 					// extraRec.addBackwardTypingConstraint(c);
 				}
