@@ -58,7 +58,9 @@ public class TextLeak implements Callable<TextLeak> {
 	private static long taskStart;
 
 	static String ApkFile = "E:\\Eclipse-Workspace\\TestAndroidAct\\bin\\TestAndroidAct.apk";
-	//static String ApkFile = "E:\\x\\y\\AM-com.nitrogen.android-221000000.apk";
+
+	// static String ApkFile =
+	// "E:\\x\\y\\AM-com.nitrogen.android-221000000.apk";
 
 	public static void main(String[] args) {
 		taskStart = System.currentTimeMillis();
@@ -74,7 +76,24 @@ public class TextLeak implements Callable<TextLeak> {
 		long end = System.currentTimeMillis();
 		String time = String.format("%d.%03d", (end - taskStart) / 1000,
 				(end - taskStart) % 1000);
+		long memUsed = Runtime.getRuntime().totalMemory()
+				- Runtime.getRuntime().freeMemory();
+		long nKB = memUsed / 1024;
+		long rByte = memUsed % 1024;
+		long nMB = nKB / 1024;
+		long rKB = nKB % 1024;
+		long nGB = nMB / 1024;
+		long rMB = nMB % 1024;
+		String mem;
+		if (nGB > 0) {
+			mem = String.format("%dG %dM %dK %dByte", nGB, rMB, rKB, rByte);
+		} else if (nMB > 0) {
+			mem = String.format("%dM %dK %dByte", nMB, rKB, rByte);
+		} else {
+			mem = String.format("%dK %dByte", nKB, rByte);
+		}
 		logger.info("Total Time: {} seconds.", time);
+		logger.info("Total Memory: {} [{} bytes]", mem, memUsed);
 		System.exit(0);
 	}
 
@@ -104,7 +123,7 @@ public class TextLeak implements Callable<TextLeak> {
 		if (!future.isDone()) {
 			future.cancel(true);
 		}
-		//Stat.dumpStat(ApkFile);
+		// Stat.dumpStat(ApkFile);
 		long analysisEnd = System.currentTimeMillis();
 		String time = String.format("%d.%03d",
 				(analysisEnd - taskStart) / 1000,
@@ -160,7 +179,7 @@ public class TextLeak implements Callable<TextLeak> {
 				break;
 			}
 			String epSig = entrypoint.getMethod().getSignature();
-			
+
 			logger.info("Process entrypoint ({}/{}) {}", idxEntrypoint++,
 					nEntrypoints, epSig);
 			epList.add(entrypoint);
@@ -172,9 +191,9 @@ public class TextLeak implements Callable<TextLeak> {
 			logger.info(" * Build CallGraph");
 			cg = cgBuilder.makeCallGraph(options, null);
 			// analyzeEntrypoint(entrypoint, cg);
-//			if (Stat.statCG(cg)) {
-//				continue;
-//			}
+			// if (Stat.statCG(cg)) {
+			// continue;
+			// }
 			if (taskTimeout) {
 				break;
 			}
