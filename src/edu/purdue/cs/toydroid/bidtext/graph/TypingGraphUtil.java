@@ -169,8 +169,10 @@ public class TypingGraphUtil {
 			Map<Statement, SimpleCounter> visited) {
 		// only scan top level stmt
 		if (0 == sdg.getPredNodeCount(stmt)
-				&& !(stmt.getKind() == Kind.HEAP_PARAM_CALLEE && stmt.getNode()
-						.equals(cg.getFakeRootNode()))) {
+		/*
+		 * && !(stmt.getKind() == Kind.HEAP_PARAM_CALLEE && stmt.getNode()
+		 * .equals(cg.getFakeRootNode()))
+		 */) {
 			List<Object> worklist = new LinkedList<Object>();
 			worklist.add(stmt);
 			while (!worklist.isEmpty()) {
