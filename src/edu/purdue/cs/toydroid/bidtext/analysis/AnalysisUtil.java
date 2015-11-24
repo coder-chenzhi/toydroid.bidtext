@@ -23,7 +23,12 @@ import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.ipa.slicer.NormalStatement;
+import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAGetInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SSAPutInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.types.Selector;
@@ -138,7 +143,7 @@ public class AnalysisUtil {
 			return;
 		}
 		Map<Entrypoint, Set<TypingNode>> visited = new HashMap<Entrypoint, Set<TypingNode>>();
-		Set<String> codeTexts = new HashSet<String>();
+		Map<String, List<Statement>> codeTexts = new HashMap<String, List<Statement>>();
 		Set<Integer> constants = new HashSet<Integer>();
 		while (args.hasNext()) {
 			TypingNode gNode = args.next();
@@ -310,13 +315,14 @@ public class AnalysisUtil {
 	}
 
 	public static void dumpTextForNode(TypingNode n, TypingSubGraph sg,
-			TypingGraph graph, Set<String> texts, Set<Integer> constants) {
+			TypingGraph graph, Map<String, List<Statement>> texts,
+			Set<Integer> constants) {
 		TypingRecord record = graph.getTypingRecord(n.getGraphNodeId());
 		if (record == null) {
 			return;
 		}
-		texts.addAll(record.getTypingTexts());
-		for (Object o : constants) {
+		texts.putAll(record.getTypingTexts());
+		for (Object o : record.getTypingConstants()) {
 			if (o instanceof Integer) {
 				constants.add((Integer) o);
 			}
@@ -325,41 +331,106 @@ public class AnalysisUtil {
 
 	// Fields that across entrypoints
 	private static void dumpTextForFields(TypingNode n, TypingSubGraph sg,
-			TypingGraph graph, Set<String> texts, Set<Integer> constants) {
+			TypingGraph graph, Map<String, List<Statement>> texts,
+			Set<Integer> constants) {
 		TypingRecord record = graph.getTypingRecord(n.getGraphNodeId());
 		if (record == null) {
 			return;
 		}
+		List<Statement> fieldPath = new LinkedList<Statement>();
 		Stack<TypingGraph> visited = new Stack<TypingGraph>();
 		List<Object> worklist = new LinkedList<Object>();
-		dumpTextForFieldsHelper(graph, record, 0, visited, worklist, texts,
-				constants, true);
+		dumpTextForFieldsHelper(graph, record, 0, visited, fieldPath, worklist,
+				texts, constants, true);
 		visited.clear();
 		worklist.clear();
-		dumpTextForFieldsHelper(graph, record, 0, visited, worklist, texts,
-				constants, false);
+		dumpTextForFieldsHelper(graph, record, 0, visited, fieldPath, worklist,
+				texts, constants, false);
 		visited = null;
 		worklist = null;
 	}
 
 	private static void dumpTextForFieldsHelper(TypingGraph graph,
 			TypingRecord record, int permLevel, Stack<TypingGraph> visited,
-			List<Object> worklist, Set<String> texts, Set<Integer> constants,
+			List<Statement> fieldPath, List<Object> worklist,
+			Map<String, List<Statement>> texts, Set<Integer> constants,
 			boolean isBackward) {
 		if (permLevel >= 2) {
 			return;
 		}
 		int worklistSize = worklist.size();
-		Set<SimpleGraphNode> sources;
+		Map<SimpleGraphNode, List<Statement>> sources;
 		if (isBackward) {
 			sources = record.getInputFields();
 		} else {
 			sources = record.getOutputFields();
 		}
 		visited.push(graph);
-		for (SimpleGraphNode sgn : sources) {
+		for (SimpleGraphNode sgn : sources.keySet()) {
 			TypingNode tn = graph.getNode(sgn.node);
 			if (tn.isField()) {
+				List<Statement> tempPath = new LinkedList<Statement>();
+				boolean startAdd = false, endAdd = false;
+				Statement connector = null;
+				String connectorSig = "";
+				if (!fieldPath.isEmpty()) {
+					connector = fieldPath.get(0);
+					if (connector.getKind() == Statement.Kind.NORMAL) {
+						NormalStatement nstmt = (NormalStatement) connector;
+						SSAInstruction inst = nstmt.getInstruction();
+						if (isBackward && inst instanceof SSAGetInstruction) {
+							connectorSig = ((SSAGetInstruction) inst).getDeclaredField()
+									.getSignature();
+						} else if (!isBackward
+								&& inst instanceof SSAPutInstruction) {
+							connectorSig = ((SSAPutInstruction) inst).getDeclaredField()
+									.getSignature();
+						}
+					}
+				}
+				List<Statement> sgnPath = sources.get(sgn);
+				for (Statement p : sgnPath) {
+					if (p.getKind() == Statement.Kind.NORMAL) {
+						NormalStatement nstmt = (NormalStatement) p;
+						SSAInstruction inst = nstmt.getInstruction();
+						if (isBackward
+								&& inst instanceof SSAGetInstruction
+								&& tn.fieldRef.getSignature()
+										.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
+							startAdd = true;
+						} else if (!isBackward
+								&& inst instanceof SSAPutInstruction
+								&& tn.fieldRef.getSignature()
+										.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
+							startAdd = true;
+						}
+					}
+					if (startAdd) {
+						tempPath.add(p);
+						if (!fieldPath.isEmpty()
+								&& p.getKind() == Statement.Kind.NORMAL) {
+							NormalStatement nstmt = (NormalStatement) p;
+							SSAInstruction inst = nstmt.getInstruction();
+							if (!isBackward
+									&& inst instanceof SSAGetInstruction
+									&& connectorSig.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
+								endAdd = true;
+							} else if (isBackward
+									&& inst instanceof SSAPutInstruction
+									&& connectorSig.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
+								endAdd = true;
+							}
+						}
+						if (endAdd) {
+							break;
+						}
+					}
+				}
+				if (endAdd) {
+					tempPath.addAll(fieldPath);
+				} else if (!fieldPath.isEmpty()) {
+					tempPath.clear();
+				}
 				String sig = tn.fieldRef.getSignature();// System.err.println(sig);
 				Map<Entrypoint, TypingGraph> entry2Graph = TypingGraphUtil.entry2Graph;
 				Set<Map.Entry<Entrypoint, TypingGraph>> entrySet = entry2Graph.entrySet();
@@ -387,6 +458,7 @@ public class AnalysisUtil {
 						worklist.add(g);
 						worklist.add(Integer.valueOf(permLevel + 1));
 						worklist.add(targets);
+						worklist.add(tempPath);// record field path
 					}
 					targets = null;
 				}
@@ -399,20 +471,69 @@ public class AnalysisUtil {
 
 	private static void dumpTextForFieldsViaWorklist(
 			Stack<TypingGraph> visited, List<Object> worklist, int initSize,
-			Set<String> texts, Set<Integer> constants, boolean isBackward) {
+			Map<String, List<Statement>> texts, Set<Integer> constants,
+			boolean isBackward) {
 		while (worklist.size() > initSize) {
 			TypingGraph graph = (TypingGraph) worklist.remove(initSize);
 			int permLevel = ((Integer) worklist.remove(initSize)).intValue();
 			Set<TypingRecord> recSet = (Set<TypingRecord>) worklist.remove(initSize);
+			List<Statement> fs = (List<Statement>) worklist.remove(initSize);
+			if (fs.isEmpty()) {
+				continue;
+			}
 			for (TypingRecord rec : recSet) {
-				texts.addAll(rec.getTypingTexts());
+				Map<String, List<Statement>> recTexts = rec.getTypingTexts();
+				Set<Map.Entry<String, List<Statement>>> set = recTexts.entrySet();
+				for (Map.Entry<String, List<Statement>> entry : set) {
+					String key = entry.getKey();
+					List<Statement> path = entry.getValue();
+					List<Statement> tempPath = new LinkedList<Statement>();
+					Statement connector = fs.get(0);
+					String connectorSig = "";
+					if (connector.getKind() == Statement.Kind.NORMAL) {
+						NormalStatement nstmt = (NormalStatement) connector;
+						SSAInstruction inst = nstmt.getInstruction();
+						if (isBackward && inst instanceof SSAGetInstruction) {
+							connectorSig = ((SSAGetInstruction) inst).getDeclaredField()
+									.getSignature();
+						} else if (!isBackward
+								&& inst instanceof SSAPutInstruction) {
+							connectorSig = ((SSAPutInstruction) inst).getDeclaredField()
+									.getSignature();
+						}
+					}
+					boolean endAdd = false;
+					for (Statement p : path) {
+						tempPath.add(p);
+						if (p.getKind() == Statement.Kind.NORMAL) {
+							NormalStatement nstmt = (NormalStatement) p;
+							SSAInstruction inst = nstmt.getInstruction();
+							if (!isBackward
+									&& inst instanceof SSAGetInstruction
+									&& connectorSig.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
+								endAdd = true;
+							} else if (isBackward
+									&& inst instanceof SSAPutInstruction
+									&& connectorSig.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
+								endAdd = true;
+							}
+						}
+						if (endAdd) {
+							break;
+						}
+					}
+					if (endAdd) {
+						tempPath.addAll(fs);
+						texts.put(key, tempPath);
+					}
+				}
 				Set<Object> consts = rec.getTypingConstants();
 				for (Object c : consts) {
 					if (c instanceof Integer) {
 						constants.add((Integer) c);
 					}
 				}
-				dumpTextForFieldsHelper(graph, rec, permLevel + 1, visited,
+				dumpTextForFieldsHelper(graph, rec, permLevel + 1, visited, fs,
 						worklist, texts, constants, isBackward);
 			}
 		}
