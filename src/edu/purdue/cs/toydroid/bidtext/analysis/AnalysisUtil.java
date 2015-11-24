@@ -161,7 +161,7 @@ public class AnalysisUtil {
 		TextAnalysis textAnalysis = new TextAnalysis();
 		String sensitiveTag = textAnalysis.analyze(codeTexts, false);
 
-		Set<String> guiTexts = new HashSet<String>();
+		Map<String, List<Statement>> guiTexts = new HashMap<String, List<Statement>>();
 		dumpTextForPossibleGUI(sink, writer, guiTexts);
 
 		// for each widget we collected, if anyone exists in multiple layouts,
@@ -180,7 +180,7 @@ public class AnalysisUtil {
 						while ((line = reader.readLine()) != null) {
 							line = line.trim();
 							if (!line.isEmpty()) {
-								guiTexts.add(line);
+								guiTexts.put(line, null);
 							}
 						}
 					} catch (Exception e) {
@@ -235,7 +235,7 @@ public class AnalysisUtil {
 					while ((line = reader.readLine()) != null) {
 						line = line.trim();
 						if (!line.isEmpty()) {
-							guiTexts.add(line);
+							guiTexts.put(line, null);
 						}
 					}
 				} catch (Exception e) {
@@ -268,7 +268,7 @@ public class AnalysisUtil {
 			}
 		}
 
-		for (String t : codeTexts) {
+		for (String t : codeTexts.keySet()) {
 			try {
 				writer.write(" - ");
 				writer.write(t);
@@ -276,7 +276,7 @@ public class AnalysisUtil {
 			} catch (IOException e) {
 			}
 		}
-		for (String t : guiTexts) {
+		for (String t : guiTexts.keySet()) {
 			try {
 				writer.write(" + ");
 				writer.write(t);
@@ -299,6 +299,30 @@ public class AnalysisUtil {
 			}
 		}
 		// dumpTextForPossibleGUI(sink, writer);
+
+		// dump paths
+		Map<String, List<Statement>> text2Path = textAnalysis.getText2Path();
+		Set<Map.Entry<String, List<Statement>>> pathSet = text2Path.entrySet();
+		for (Map.Entry<String, List<Statement>> entry : pathSet) {
+			String text = entry.getKey();
+			List<Statement> path = entry.getValue();
+			try {
+				writer.newLine();
+				writer.newLine();
+				writer.write("********");
+				writer.write(text.trim());
+				writer.write("********");
+				writer.newLine();
+				for (Statement stmt : path) {
+					writer.write(stmt.toString());
+					writer.newLine();
+				}
+				writer.flush();
+			} catch (IOException e) {
+
+			}
+		}
+
 		try {
 			writer.flush();
 			writer.close();
@@ -541,7 +565,7 @@ public class AnalysisUtil {
 
 	// currently only for the GUI that triggers the sink operation
 	private static void dumpTextForPossibleGUI(InterestingNode sink,
-			BufferedWriter writer, Set<String> texts) {
+			BufferedWriter writer, Map<String, List<Statement>> texts) {
 		String epClass = sink.enclosingTypingGraph().entry.getMethod()
 				.getDeclaringClass()
 				.getName()
@@ -558,7 +582,7 @@ public class AnalysisUtil {
 						// writer.write(" + ");
 						// writer.write(line);
 						// writer.newLine();
-						texts.add(line);
+						texts.put(line, null);
 					}
 				} catch (IOException e) {
 

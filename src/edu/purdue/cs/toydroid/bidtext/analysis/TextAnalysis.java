@@ -46,6 +46,10 @@ public class TextAnalysis {
 		text2Path = new HashMap<String, List<Statement>>();
 	}
 
+	public Map<String, List<Statement>> getText2Path() {
+		return text2Path;
+	}
+
 	public String analyze(Map<String, List<Statement>> texts, boolean isGUIText) {
 		this.isGUIText = isGUIText;
 		tagBuilder = new StringBuilder();
