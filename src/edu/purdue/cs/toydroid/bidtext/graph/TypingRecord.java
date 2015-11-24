@@ -75,7 +75,7 @@ public class TypingRecord {
 		}
 		typingConstants.addAll(rec.typingConstants);
 		// input fields
-		Set<Map.Entry<SimpleGraphNode, List<Statement>>> fieldSet = localInputs.entrySet();
+		Set<Map.Entry<SimpleGraphNode, List<Statement>>> fieldSet = rec.inputFields.entrySet();
 		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
 			SimpleGraphNode key = entry.getKey();
 			if (!localInputs.containsKey(key)) {
@@ -86,7 +86,7 @@ public class TypingRecord {
 			}
 		}
 		// output fields
-		fieldSet = localOutputs.entrySet();
+		fieldSet = rec.outputFields.entrySet();
 		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
 			SimpleGraphNode key = entry.getKey();
 			if (!localOutputs.containsKey(key)) {
