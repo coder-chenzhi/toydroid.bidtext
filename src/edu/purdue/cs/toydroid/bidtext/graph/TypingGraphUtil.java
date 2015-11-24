@@ -1260,7 +1260,7 @@ public class TypingGraphUtil {
 			// TypingNode nextNode = currentTypingGraph.getNode(nextId);
 			TypingRecord nextRec = currentTypingGraph.getTypingRecord(nextId);
 			// System.err.println(record.getTypingTexts());
-			if (nextRec.merge(record)) {
+			if (nextRec.merge(record, ct.getPath())) {
 				worklist.add(nextRec);
 				changed = true;
 			}
@@ -1284,38 +1284,20 @@ public class TypingGraphUtil {
 			List<TypingRecord> worklist) {
 		boolean changed = false;
 		Set<TypingConstraint> constraints = record.getBackwardTypingConstraints();
-		int lhs_assign = -1;
-		int[] rhs_assign = { -1, -1 };
-		int idx = 0;
+		List<TypingConstraint> geAssignList = new LinkedList<TypingConstraint>();
 		for (TypingConstraint ct : constraints) {
 			int nextId = ct.rhs;
 			int sym = ct.sym;
 			TypingRecord nextRec = currentTypingGraph.getTypingRecord(nextId);
 			if (sym == TypingConstraint.EQ || sym == TypingConstraint.GE) {
-				if (nextRec.merge(record)) {
+				if (nextRec.merge(record, ct.getPath())) {
 					worklist.add(nextRec);
 					changed = true;
 				}
 			} else if (sym == TypingConstraint.GE_ASSIGN) {
-				if (lhs_assign == -1) {
-					lhs_assign = ct.lhs;
-					rhs_assign[idx++] = nextId;
-				} else {
-					if (lhs_assign != ct.lhs) {
-						logger.error(
-								"     ? Inconsistent LHS for assignment: {} - {}",
-								lhs_assign, ct.lhs);
-					} else if (idx >= 2) {
-						logger.error(
-								"     ? Wrong Assignment with at least {} RHS",
-								(idx + 1));
-					} else {
-						rhs_assign[idx] = nextId;
-					}
-					idx++;
-				}
+				geAssignList.add(ct);
 			} else if (sym == TypingConstraint.GE_APPEND) {
-				if (nextRec.mergeIfEmptyTexts(record)) {
+				if (nextRec.mergeIfEmptyTexts(record, ct.getPath())) {
 					worklist.add(nextRec);
 					changed = true;
 				}
@@ -1324,113 +1306,199 @@ public class TypingGraphUtil {
 			// System.err.println(ct.lhs + "  ->- " + nextId);
 			// }
 		}
-		if (idx == 1) {
-			// e.g. a = b + b
-			TypingRecord nextRec = currentTypingGraph.getTypingRecord(rhs_assign[0]);
-			if (nextRec.merge(record)) {
+		int galSize = geAssignList.size();
+		if (galSize == 1) {
+			TypingConstraint c = geAssignList.remove(0);
+			TypingRecord nextRec = currentTypingGraph.getTypingRecord(c.rhs);
+			if (nextRec.merge(record, c.getPath())) {
 				worklist.add(nextRec);
 				changed = true;
 			}
-		} else if (idx == 2 && rhs_assign[1] != -1) {
-			TypingRecord rec0 = currentTypingGraph.getTypingRecord(rhs_assign[0]);
-			TypingRecord rec1 = currentTypingGraph.getTypingRecord(rhs_assign[1]);
-			Set<String> texts0 = rec0.getTypingTexts();
-			Set<String> texts1 = rec1.getTypingTexts();
-			Set<Object> const0 = rec0.getTypingConstants();
-			Set<Object> const1 = rec1.getTypingConstants();
-			Set<SimpleGraphNode> inputs0 = rec0.getInputFields();
-			Set<SimpleGraphNode> inputs1 = rec1.getInputFields();
-			Set<SimpleGraphNode> outputs0 = rec0.getOutputFields();
-			Set<SimpleGraphNode> outputs1 = rec1.getOutputFields();
-			boolean changed0 = false, changed1 = false;
-			// propagate texts
-			if (!record.getTypingTexts().isEmpty()) {
-				if (texts0.isEmpty()) {
-					texts0.addAll(record.getTypingTexts());
-					if (texts1.isEmpty()) {
-						texts1.addAll(texts0);
-						changed0 = true;
-						changed1 = true;
-					} else {
-						texts0.removeAll(texts1);
-						changed0 = !texts0.isEmpty();
-					}
+		} else if (galSize > 1) {
+			if (galSize > 2) {
+				logger.error("    ? Wrong assignment with {} RHS: {}", galSize,
+						geAssignList.toString());
+			} else {
+				TypingConstraint tc0 = geAssignList.remove(0);
+				TypingConstraint tc1 = geAssignList.remove(0);
+				if (tc0.lhs != tc1.lhs) {
+					logger.error(
+							"    ? Wrong Assignment with different LHS: {} -- {}",
+							tc0.toString(), tc1.toString());
 				} else {
-					if (texts1.isEmpty()) {
-						texts1.addAll(record.getTypingTexts());
-						texts1.removeAll(texts0);
-						changed1 = !texts1.isEmpty();
+					TypingRecord rec0 = currentTypingGraph.getTypingRecord(tc0.rhs);
+					TypingRecord rec1 = currentTypingGraph.getTypingRecord(tc1.rhs);
+					boolean changed0 = false, changed1 = false;
+					// propagate texts
+					Map<String, List<Statement>> texts0 = rec0.getTypingTexts();
+					Map<String, List<Statement>> texts1 = rec1.getTypingTexts();
+					Map<String, List<Statement>> texts = record.getTypingTexts();
+					if (!texts.isEmpty()) {
+						if (texts0.isEmpty() && texts1.isEmpty()) {
+							Map<String, List<Statement>> tmp = new HashMap<String, List<Statement>>();
+							tmp.putAll(texts);
+							Set<Map.Entry<String, List<Statement>>> set = tmp.entrySet();
+							for (Map.Entry<String, List<Statement>> entry : set) {
+								List<Statement> path = entry.getValue();
+								// now we think tc0 and tc1 has the same
+								// recorded path (the binary op stmt)
+								path.addAll(tc0.getPath());
+							}
+							texts0.putAll(tmp);
+							texts1.putAll(tmp);
+							changed0 = true;
+							changed1 = true;
+						} else if (texts0.isEmpty() || texts1.isEmpty()) {
+							Map<String, List<Statement>> emptyTexts, nonEmptyTexts;
+							boolean isZero = true;
+							if (texts0.isEmpty()) {
+								emptyTexts = texts0;
+								nonEmptyTexts = texts1;
+							} else {
+								emptyTexts = texts1;
+								nonEmptyTexts = texts0;
+								isZero = false;
+							}
+							emptyTexts.putAll(texts);
+							for (String key : nonEmptyTexts.keySet()) {
+								emptyTexts.remove(key);
+							}
+							if (!emptyTexts.isEmpty()) {
+								Set<Map.Entry<String, List<Statement>>> set = emptyTexts.entrySet();
+								for (Map.Entry<String, List<Statement>> entry : set) {
+									List<Statement> path = entry.getValue();
+									path.addAll(tc0.getPath());
+								}
+								if (isZero)
+									changed0 = true;
+								else
+									changed1 = true;
+							}
+						}
+					}
+					// propagate constants
+					Set<Object> const0 = rec0.getTypingConstants();
+					Set<Object> const1 = rec1.getTypingConstants();
+					Set<Object> constr = record.getTypingConstants();
+					if (!constr.isEmpty()) {
+						if (const0.isEmpty() && const1.isEmpty()) {
+							const0.addAll(constr);
+							const1.addAll(constr);
+							changed0 = true;
+							changed1 = true;
+						} else if (const0.isEmpty() || const1.isEmpty()) {
+							Set<Object> empty, nonEmpty;
+							boolean isZero = true;
+							if (const0.isEmpty()) {
+								empty = const0;
+								nonEmpty = const1;
+							} else {
+								empty = const1;
+								nonEmpty = const1;
+								isZero = false;
+							}
+							empty.addAll(constr);
+							empty.removeAll(nonEmpty);
+							if (!empty.isEmpty()) {
+								if (isZero)
+									changed0 = true;
+								else
+									changed1 = true;
+							}
+						}
+					}
+					// propagate inputs
+					Map<SimpleGraphNode, List<Statement>> input0 = rec0.getInputFields();
+					Map<SimpleGraphNode, List<Statement>> input1 = rec1.getInputFields();
+					Map<SimpleGraphNode, List<Statement>> inputs = record.getInputFields();
+					if (!inputs.isEmpty()) {
+						if (input0.isEmpty() && input1.isEmpty()) {
+							Map<SimpleGraphNode, List<Statement>> tmp = new HashMap<SimpleGraphNode, List<Statement>>();
+							tmp.putAll(inputs);
+							Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = tmp.entrySet();
+							for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
+								List<Statement> path = entry.getValue();
+								path.addAll(tc0.getPath());
+							}
+						} else if (input0.isEmpty() || input1.isEmpty()) {
+							Map<SimpleGraphNode, List<Statement>> empty, nonEmpty;
+							boolean isZero = true;
+							if (input0.isEmpty()) {
+								empty = input0;
+								nonEmpty = input1;
+							} else {
+								empty = input1;
+								nonEmpty = input0;
+								isZero = false;
+							}
+							empty.putAll(inputs);
+							for (SimpleGraphNode sgn : nonEmpty.keySet()) {
+								empty.remove(sgn);
+							}
+							if (!empty.isEmpty()) {
+								Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = empty.entrySet();
+								for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
+									List<Statement> path = entry.getValue();
+									path.addAll(tc0.getPath());
+								}
+								if (isZero)
+									changed0 = true;
+								else
+									changed1 = true;
+							}
+						}
+					}
+					// propagate outputs
+					Map<SimpleGraphNode, List<Statement>> output0 = rec0.getOutputFields();
+					Map<SimpleGraphNode, List<Statement>> output1 = rec1.getOutputFields();
+					Map<SimpleGraphNode, List<Statement>> outputs = record.getOutputFields();
+					if (!outputs.isEmpty()) {
+						if (output0.isEmpty() && output1.isEmpty()) {
+							Map<SimpleGraphNode, List<Statement>> tmp = new HashMap<SimpleGraphNode, List<Statement>>();
+							tmp.putAll(outputs);
+							Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = tmp.entrySet();
+							for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
+								List<Statement> path = entry.getValue();
+								path.addAll(tc0.getPath());
+							}
+						} else if (output0.isEmpty() || output1.isEmpty()) {
+							Map<SimpleGraphNode, List<Statement>> empty, nonEmpty;
+							boolean isZero = true;
+							if (output0.isEmpty()) {
+								empty = output0;
+								nonEmpty = output1;
+							} else {
+								empty = output1;
+								nonEmpty = output0;
+								isZero = false;
+							}
+							empty.putAll(outputs);
+							for (SimpleGraphNode sgn : nonEmpty.keySet()) {
+								empty.remove(sgn);
+							}
+							if (!empty.isEmpty()) {
+								Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = empty.entrySet();
+								for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
+									List<Statement> path = entry.getValue();
+									path.addAll(tc0.getPath());
+								}
+								if (isZero)
+									changed0 = true;
+								else
+									changed1 = true;
+							}
+						}
+					}
+					// propagate
+					if (changed0) {
+						worklist.add(rec0);
+						changed = true;
+					}
+					if (changed1) {
+						worklist.add(rec1);
+						changed = true;
 					}
 				}
-			}
-			// propagate constants
-			if (!record.getTypingConstants().isEmpty()) {
-				if (const0.isEmpty()) {
-					const0.addAll(record.getTypingConstants());
-					if (const1.isEmpty()) {
-						const1.addAll(const0);
-						changed0 = true;
-						changed1 = true;
-					} else {
-						const0.removeAll(const1);
-						changed0 = (changed0 | !const0.isEmpty());
-					}
-				} else {
-					if (const1.isEmpty()) {
-						const1.addAll(record.getTypingConstants());
-						const1.removeAll(const0);
-						changed1 = (changed1 | !const1.isEmpty());
-					}
-				}
-			}
-			// propagate inputs
-			if (!record.getInputFields().isEmpty()) {
-				if (inputs0.isEmpty()) {
-					inputs0.addAll(record.getInputFields());
-					if (inputs1.isEmpty()) {
-						inputs1.addAll(inputs0);
-						changed0 = true;
-						changed1 = true;
-					} else {
-						inputs0.removeAll(inputs1);
-						changed0 = (changed0 | !inputs0.isEmpty());
-					}
-				} else {
-					if (inputs1.isEmpty()) {
-						inputs1.addAll(record.getInputFields());
-						inputs1.removeAll(inputs0);
-						changed1 = (changed1 | !inputs1.isEmpty());
-					}
-				}
-			}
-			// propagate outputs
-			if (!record.getOutputFields().isEmpty()) {
-				if (outputs0.isEmpty()) {
-					outputs0.addAll(record.getOutputFields());
-					if (outputs1.isEmpty()) {
-						outputs1.addAll(outputs0);
-						changed0 = true;
-						changed1 = true;
-					} else {
-						outputs0.removeAll(outputs1);
-						changed0 = (changed0 | !outputs0.isEmpty());
-					}
-				} else {
-					if (outputs1.isEmpty()) {
-						outputs1.addAll(record.getOutputFields());
-						outputs1.removeAll(outputs0);
-						changed1 = (changed1 | !outputs1.isEmpty());
-					}
-				}
-			}
-			// propagate
-			if (changed0) {
-				worklist.add(rec0);
-				changed = true;
-			}
-			if (changed1) {
-				worklist.add(rec1);
-				changed = true;
 			}
 		}
 		return changed;
