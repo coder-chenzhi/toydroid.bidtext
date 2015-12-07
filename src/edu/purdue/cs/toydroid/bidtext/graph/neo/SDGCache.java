@@ -9,10 +9,14 @@ import org.apache.logging.log4j.Logger;
 
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
+import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.slicer.NormalReturnCaller;
 import com.ibm.wala.ipa.slicer.ParamCaller;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.util.graph.Graph;
+
+import edu.purdue.cs.toydroid.utils.WalaUtil;
 
 public class SDGCache {
 	private static Logger logger = LogManager.getLogger(SDGCache.class);
@@ -26,6 +30,34 @@ public class SDGCache {
 
 	public Entrypoint entrypoint() {
 		return entry;
+	}
+
+	public void buildCache(Graph<Statement> sdg, ClassHierarchy cha) {
+		logger.info("Build SDG Cache...");
+		for (Statement stmt : sdg) {
+			Statement.Kind k = stmt.getKind();
+			if (k == Statement.Kind.PARAM_CALLER
+					&& 0 == sdg.getSuccNodeCount(stmt)) {
+				ParamCaller pcaller = (ParamCaller) stmt;
+				if (WalaUtil.isAPI(pcaller)) {
+					CGNode cgn = pcaller.getNode();
+					int value = pcaller.getValueNumber();
+					addCache(cgn, value, stmt);
+				}
+			} else if (k == Statement.Kind.NORMAL_RET_CALLER
+					&& 0 == sdg.getPredNodeCount(stmt)) {
+				NormalReturnCaller nrc = (NormalReturnCaller) stmt;
+				if (WalaUtil.isAPI(nrc)) {
+					CGNode cgn = nrc.getNode();
+					SSAAbstractInvokeInstruction inst = nrc.getInstruction();
+					int nUses = inst.getNumberOfUses();
+					for (int i = 0; i < nUses; i++) {
+						int use = inst.getUse(i);
+						addCache(cgn, use, stmt);
+					}
+				}
+			}
+		}
 	}
 
 	/**
