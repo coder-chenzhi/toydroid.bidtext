@@ -44,6 +44,8 @@ import com.ibm.wala.viz.DotUtil;
 import edu.purdue.cs.toydroid.bidtext.analysis.AnalysisUtil;
 import edu.purdue.cs.toydroid.bidtext.graph.TypingGraph;
 import edu.purdue.cs.toydroid.bidtext.graph.TypingGraphUtil;
+import edu.purdue.cs.toydroid.bidtext.graph.neo.SDGCache;
+import edu.purdue.cs.toydroid.bidtext.graph.neo.SimplifiedSDG;
 import edu.purdue.cs.toydroid.utils.AnalysisScopeUtil;
 import edu.purdue.cs.toydroid.utils.EntrypointUtil;
 import edu.purdue.cs.toydroid.utils.ResourceUtil;
@@ -235,9 +237,15 @@ public class TextLeak implements Callable<TextLeak> {
 			// entrypoint.getMethod().getName().toString() + ".dot", null,
 			// null);
 			// }
+			SDGCache sdgCache = new SDGCache(entrypoint);
+			sdgCache.buildCache(g, cha);
+			SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
+			// DotUtil.dotify(simSDG, WalaUtil.makeNodeDecorator(),
+			// entrypoint.getMethod().getName().toString() + ".s.dot", null,
+			// null);
 
 			logger.info(" * Build TypingGraph");
-			TypingGraphUtil.buildTypingGraph(entrypoint, cg, g, cha);
+			TypingGraphUtil.buildTypingGraph(entrypoint, cg, simSDG, cha);
 
 			epList.clear();
 		}
@@ -296,10 +304,10 @@ public class TextLeak implements Callable<TextLeak> {
 							return false;
 						}
 					}
-				} else if (k == Statement.Kind.PARAM_CALLER) {
-					if (sdg.getPredNodeCount(t) == 0) {
-						return false;
-					}
+//				} else if (k == Statement.Kind.PARAM_CALLER) {
+//					if (sdg.getPredNodeCount(t) == 0) {
+//						return false;
+//					}
 				} else if (t instanceof HeapStatement) {
 					HeapStatement hs = (HeapStatement) t;
 					PointerKey pk = hs.getLocation();
