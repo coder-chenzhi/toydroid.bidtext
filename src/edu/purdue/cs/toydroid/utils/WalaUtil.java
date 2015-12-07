@@ -20,6 +20,7 @@ import com.ibm.wala.ipa.slicer.PhiStatement;
 import com.ibm.wala.ipa.slicer.Statement;
 import com.ibm.wala.ipa.slicer.Statement.Kind;
 import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.MethodReference;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.viz.NodeDecorator;
@@ -113,5 +114,28 @@ public class WalaUtil {
 			}
 
 		};
+	}
+
+	public static boolean isAPI(ParamCaller stmt) {
+		return isAPI(stmt.getInstruction().getDeclaredTarget());
+	}
+
+	public static boolean isAPI(NormalReturnCaller stmt) {
+		return isAPI(stmt.getInstruction().getDeclaredTarget());
+	}
+
+	public static boolean isAPI(MethodReference mRef) {
+		try {
+			IMethod m = cha.resolveMethod(mRef);
+			if (m.getDeclaringClass()
+					.getClassLoader()
+					.getReference()
+					.equals(ClassLoaderReference.Primordial)) {
+				return true;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		return false;
 	}
 }
