@@ -169,9 +169,13 @@ public class SDGCache {
 			ParamCaller pcaller = (ParamCaller) stmt;
 			SDGSubCache sc = cg2cache.get(cgn);
 			if (sc != null) {
-				int value = pcaller.getValueNumber();
+				SSAAbstractInvokeInstruction inst = pcaller.getInstruction();
+				int nUses = inst.getNumberOfUses();
 				cache = new LinkedList<Statement>();
-				sc.moveCacheTo(value, cache);
+				for (int i = 0; i < nUses; i++) {
+					int use = inst.getUse(i);
+					sc.moveCacheTo(use, cache);
+				}
 			}
 		} else if (k == Statement.Kind.NORMAL_RET_CALLER) {
 			NormalReturnCaller nrc = (NormalReturnCaller) stmt;
