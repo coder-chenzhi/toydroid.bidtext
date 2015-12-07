@@ -1,9 +1,12 @@
 package edu.purdue.cs.toydroid.bidtext.graph.neo;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import com.ibm.wala.ipa.slicer.HeapStatement;
 import com.ibm.wala.ipa.slicer.NormalReturnCaller;
 import com.ibm.wala.ipa.slicer.ParamCaller;
 import com.ibm.wala.ipa.slicer.PhiStatement;
@@ -75,22 +78,69 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 			Iterator<Statement> iter = oldSDG.getSuccNodes(statement);
 			while (iter.hasNext()) {
 				Statement succ = iter.next();
-				if (!this.containsNode(succ)) {
-					this.addNode(succ);
-					worklist.add(succ);
+				if (succ instanceof HeapStatement) {
+					skipHeapStmt(oldSDG, cache, statement, succ, worklist, true);
+				} else {
+					if (!this.containsNode(succ)) {
+						this.addNode(succ);
+						worklist.add(succ);
+					}
+					this.addEdge(statement, succ);
 				}
-				this.addEdge(statement, succ);
 			}
 			// pred
 			iter = oldSDG.getPredNodes(statement);
 			while (iter.hasNext()) {
 				Statement pred = iter.next();
-				if (!this.containsNode(pred)) {
-					this.addNode(pred);
-					worklist.add(pred);
+				if (pred instanceof HeapStatement) {
+					skipHeapStmt(oldSDG, cache, statement, pred, worklist,
+							false);
+				} else {
+					if (!this.containsNode(pred)) {
+						this.addNode(pred);
+						worklist.add(pred);
+					}
+					this.addEdge(pred, statement);
 				}
-				this.addEdge(pred, statement);
 			}
 		}
+	}
+
+	private void skipHeapStmt(Graph<Statement> oldSDG, SDGCache cache,
+			Statement src, Statement heapStmt, List<Statement> worklist,
+			boolean forward) {
+		List<Statement> heapWorklist = new LinkedList<Statement>();
+		Set<Statement> visited = new HashSet<Statement>();
+		heapWorklist.add(heapStmt);
+		visited.add(heapStmt);
+		while (!heapWorklist.isEmpty()) {
+			Statement stmt = heapWorklist.remove(0);
+			Iterator<Statement> iter;
+			if (forward) {
+				iter = oldSDG.getSuccNodes(stmt);
+			} else {
+				iter = oldSDG.getPredNodes(stmt);
+			}
+			while (iter.hasNext()) {
+				stmt = iter.next();
+				if (stmt instanceof HeapStatement) {
+					if (!visited.contains(stmt)) {
+						heapWorklist.add(stmt);
+						visited.add(stmt);
+					}
+				} else {
+					if (!this.containsNode(stmt)) {
+						this.addNode(stmt);
+						worklist.add(stmt);
+					}
+					if (forward) {
+						this.addEdge(src, stmt);
+					} else {
+						this.addEdge(stmt, src);
+					}
+				}
+			}
+		}
+
 	}
 }
