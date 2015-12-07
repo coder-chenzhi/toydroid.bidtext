@@ -3,6 +3,7 @@ package edu.purdue.cs.toydroid.bidtext.graph.neo;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -159,6 +160,34 @@ public class SDGCache {
 		subCache.addCache(value, stmt);
 	}
 
+	public List<Statement> getCache(Statement stmt) {
+		Statement.Kind k = stmt.getKind();
+		CGNode cgn = stmt.getNode();
+		List<Statement> cache = null;
+		if (k == Statement.Kind.PARAM_CALLER) {
+			ParamCaller pcaller = (ParamCaller) stmt;
+			SDGSubCache sc = cg2cache.get(cgn);
+			if (sc != null) {
+				int value = pcaller.getValueNumber();
+				cache = new LinkedList<Statement>();
+				sc.moveCacheTo(value, cache);
+			}
+		} else if (k == Statement.Kind.NORMAL_RET_CALLER) {
+			NormalReturnCaller nrc = (NormalReturnCaller) stmt;
+			SDGSubCache sc = cg2cache.get(cgn);
+			if (sc != null) {
+				SSAAbstractInvokeInstruction inst = nrc.getInstruction();
+				int nUses = inst.getNumberOfUses();
+				cache = new LinkedList<Statement>();
+				for (int i = 0; i < nUses; i++) {
+					int use = inst.getUse(i);
+					sc.moveCacheTo(use, cache);
+				}
+			}
+		}
+		return cache;
+	}
+
 	class SDGSubCache {
 		private CGNode cgNode;
 		private Map<Integer, LinkedList<Statement>> var2use;
@@ -182,6 +211,27 @@ public class SDGCache {
 				var2use.put(iObj, uses);
 			}
 			uses.add(stmt);
+		}
+
+		/**
+		 * Move corresponding cache to the given LIST. No cache exists for the
+		 * variable after this operation.
+		 * 
+		 * @param var
+		 * @param list
+		 *            Holding the return cache.
+		 */
+		public void moveCacheTo(int var, List<Statement> list) {
+			Integer iObj = Integer.valueOf(var);
+			LinkedList<Statement> cache = var2use.get(iObj);
+			if (cache != null) {
+				int n = cache.size();
+				while (!cache.isEmpty()) {
+					Statement stmt = cache.remove();
+					list.add(stmt);
+				}
+				var2use.remove(iObj);
+			}
 		}
 	}
 }
