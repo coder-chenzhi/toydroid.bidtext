@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.ibm.wala.ipa.slicer.HeapStatement;
 import com.ibm.wala.ipa.slicer.NormalReturnCaller;
 import com.ibm.wala.ipa.slicer.ParamCaller;
@@ -20,6 +23,8 @@ import com.ibm.wala.util.graph.impl.SlowNumberedNodeManager;
 import com.ibm.wala.util.graph.impl.SparseNumberedEdgeManager;
 
 public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
+	private static Logger logger = LogManager.getLogger(SimplifiedSDG.class);
+
 	private NumberedNodeManager<Statement> nodeMgr = new SlowNumberedNodeManager<Statement>();
 	private NumberedEdgeManager<Statement> edgeMgr = new SparseNumberedEdgeManager<Statement>(
 			nodeMgr);
@@ -41,9 +46,11 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 			Statement stmt = iter.next();
 			newSDG.simplifyStmt(oldSDG, cache, stmt);
 		}
-		if (newSDG.getNumberOfNodes() == 0) {
+		int num = newSDG.getNumberOfNodes();
+		if (num == 0) {
 			newSDG = null;
 		}
+		logger.info("SDG size after simplifying: {}", newSDG == null ? 0 : num);
 		return newSDG;
 	}
 
