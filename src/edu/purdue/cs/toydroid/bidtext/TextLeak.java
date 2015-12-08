@@ -241,12 +241,14 @@ public class TextLeak implements Callable<TextLeak> {
 			sdgCache.buildCache(g, cha);
 			SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
 			// DotUtil.dotify(simSDG, WalaUtil.makeNodeDecorator(),
-			// entrypoint.getMethod().getName().toString() + ".s.dot", null,
-			// null);
-
-			logger.info(" * Build TypingGraph");
-			TypingGraphUtil.buildTypingGraph(entrypoint, cg, simSDG, cha);
-
+			// entrypoint.getMethod().getName().toString() + ".s.dot",
+			// null, null);
+			if (simSDG == null) {
+				logger.info(" * Empty SDG. No interesting stmt found.");
+			} else {
+				logger.info(" * Build TypingGraph");
+				TypingGraphUtil.buildTypingGraph(entrypoint, cg, simSDG, cha);
+			}
 			epList.clear();
 		}
 
@@ -304,10 +306,10 @@ public class TextLeak implements Callable<TextLeak> {
 							return false;
 						}
 					}
-//				} else if (k == Statement.Kind.PARAM_CALLER) {
-//					if (sdg.getPredNodeCount(t) == 0) {
-//						return false;
-//					}
+					// } else if (k == Statement.Kind.PARAM_CALLER) {
+					// if (sdg.getPredNodeCount(t) == 0) {
+					// return false;
+					// }
 				} else if (t instanceof HeapStatement) {
 					HeapStatement hs = (HeapStatement) t;
 					PointerKey pk = hs.getLocation();
