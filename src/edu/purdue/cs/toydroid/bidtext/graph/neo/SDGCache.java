@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.ibm.wala.analysis.stackMachine.AbstractIntStackMachine;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
@@ -33,12 +34,12 @@ public class SDGCache {
 	private static Logger logger = LogManager.getLogger(SDGCache.class);
 	private Entrypoint entry;
 	private Map<CGNode, SDGSubCache> cg2cache;
-	private Set<Statement> cachedStmt;
+	private List<Statement> cachedStmt;
 
 	public SDGCache(Entrypoint e) {
 		entry = e;
 		cg2cache = new HashMap<CGNode, SDGSubCache>();
-		cachedStmt = new HashSet<Statement>();
+		cachedStmt = new LinkedList<Statement>();
 	}
 
 	public Entrypoint entrypoint() {
@@ -61,7 +62,8 @@ public class SDGCache {
 					nUses = inst.getNumberOfUses();
 					for (idx = 0; idx < nUses; idx++) {
 						int v = inst.getUse(idx);
-						if (symTable.isConstant(v)
+						if (v != AbstractIntStackMachine.TOP
+								&& symTable.isConstant(v)
 								&& !symTable.isNullConstant(v)) {
 							cachedStmt.add(stmt);
 							break;
