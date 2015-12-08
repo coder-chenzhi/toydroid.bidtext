@@ -494,7 +494,7 @@ public class TypingGraphUtil {
 				c.addPath(stmt);
 				orec.addForwardTypingConstraint(c);
 				nrec.addBackwardTypingConstraint(bc);
-				cachedStmt = null;
+				//cachedStmt = null;
 			}
 		}
 	}
@@ -806,8 +806,11 @@ public class TypingGraphUtil {
 		String apiSig = inst.getDeclaredTarget().getSignature();
 		if (apiSig.startsWith("java.lang.StringBuilder.append(")
 				|| apiSig.startsWith("java.lang.StringBuilder.<init>(Ljava/")) {
-			handleStringBuilderAppend(cgNode, defNode, defRec, thisNode,
-					thisRec, sg.find(inst.getUse(1)));
+			if ((stmt.getKind() == Kind.PARAM_CALLER && ((ParamCaller) stmt).getValueNumber() == inst.getUse(1))
+					|| stmt.getKind() == Kind.NORMAL_RET_CALLER) {
+				handleStringBuilderAppend(cgNode, defNode, defRec, thisNode,
+						thisRec, sg.find(inst.getUse(1)));
+			}
 			return;
 		} else if (apiSig.startsWith("java.lang.StringBuilder.toString(")) {
 			handleStringBuilderToString(defNode, defRec, thisNode, thisRec);
