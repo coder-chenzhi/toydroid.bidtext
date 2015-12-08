@@ -58,17 +58,6 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 			Statement stmt) {
 		// add STMT and correlated stmts to new SDG
 		simplifyByBFS(oldSDG, cache, stmt);
-		// handle (potential) disconnected API calls
-		Statement.Kind k = stmt.getKind();
-		if ((k == Statement.Kind.PARAM_CALLER && 0 == oldSDG.getSuccNodeCount(stmt))
-				|| (k == Statement.Kind.NORMAL_RET_CALLER && 0 == oldSDG.getPredNodeCount(stmt))) {
-			List<Statement> correlated = cache.getCache(stmt);
-			if (correlated != null) {
-				while (!correlated.isEmpty()) {
-					simplifyStmt(oldSDG, cache, correlated.remove(0));
-				}
-			}
-		}
 	}
 
 	private void simplifyByBFS(Graph<Statement> oldSDG, SDGCache cache,
@@ -77,10 +66,7 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 		worklist.add(stmt);
 		while (!worklist.isEmpty()) {
 			Statement statement = worklist.remove(0);
-			if (this.containsNode(statement)) {
-				continue;
-			}
-			this.addNode(statement);
+			checkAndAddNode(oldSDG, cache, statement, worklist);
 			// succ
 			Iterator<Statement> iter = oldSDG.getSuccNodes(statement);
 			while (iter.hasNext()) {
@@ -88,10 +74,7 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 				if (succ instanceof HeapStatement) {
 					skipHeapStmt(oldSDG, cache, statement, succ, worklist, true);
 				} else {
-					if (!this.containsNode(succ)) {
-						this.addNode(succ);
-						worklist.add(succ);
-					}
+					checkAndAddNode(oldSDG, cache, succ, worklist);
 					this.addEdge(statement, succ);
 				}
 			}
@@ -103,10 +86,7 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 					skipHeapStmt(oldSDG, cache, statement, pred, worklist,
 							false);
 				} else {
-					if (!this.containsNode(pred)) {
-						this.addNode(pred);
-						worklist.add(pred);
-					}
+					checkAndAddNode(oldSDG, cache, pred, worklist);
 					this.addEdge(pred, statement);
 				}
 			}
@@ -136,10 +116,7 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 						visited.add(stmt);
 					}
 				} else {
-					if (!this.containsNode(stmt)) {
-						this.addNode(stmt);
-						worklist.add(stmt);
-					}
+					checkAndAddNode(oldSDG, cache, stmt, worklist);
 					if (forward) {
 						this.addEdge(src, stmt);
 					} else {
@@ -149,5 +126,26 @@ public class SimplifiedSDG extends AbstractNumberedGraph<Statement> {
 			}
 		}
 
+	}
+
+	private void checkAndAddNode(Graph<Statement> oldSDG, SDGCache cache,
+			Statement stmt, List<Statement> worklist) {
+		if (!this.containsNode(stmt)) {
+			this.addNode(stmt);
+			worklist.add(stmt);
+			Statement.Kind k = stmt.getKind();
+			if ((k == Statement.Kind.PARAM_CALLER && 0 == oldSDG.getSuccNodeCount(stmt))
+					|| (k == Statement.Kind.NORMAL_RET_CALLER && 0 == oldSDG.getPredNodeCount(stmt))) {
+				List<Statement> correlated = cache.getCache(stmt);
+				if (correlated != null) {
+					while (!correlated.isEmpty()) {
+						stmt = correlated.remove(0);
+						if (!this.containsNode(stmt)) {
+							worklist.add(stmt);
+						}
+					}
+				}
+			}
+		}
 	}
 }
