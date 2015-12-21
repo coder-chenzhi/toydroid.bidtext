@@ -494,7 +494,7 @@ public class TypingGraphUtil {
 				c.addPath(stmt);
 				orec.addForwardTypingConstraint(c);
 				nrec.addBackwardTypingConstraint(bc);
-				//cachedStmt = null;
+				// cachedStmt = null;
 			}
 		}
 	}
@@ -1415,7 +1415,9 @@ public class TypingGraphUtil {
 								List<Statement> path = entry.getValue();
 								// now we think tc0 and tc1 has the same
 								// recorded path (the binary op stmt)
-								path.addAll(tc0.getPath());
+								if (path != null) {
+									path.addAll(tc0.getPath());
+								}
 							}
 							texts0.putAll(tmp);
 							texts1.putAll(tmp);
@@ -1440,7 +1442,9 @@ public class TypingGraphUtil {
 								Set<Map.Entry<String, List<Statement>>> set = emptyTexts.entrySet();
 								for (Map.Entry<String, List<Statement>> entry : set) {
 									List<Statement> path = entry.getValue();
-									path.addAll(tc0.getPath());
+									if (path != null) {
+										path.addAll(tc0.getPath());
+									}
 								}
 								if (isZero)
 									changed0 = true;
