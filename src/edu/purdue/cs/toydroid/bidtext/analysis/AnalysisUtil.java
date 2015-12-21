@@ -518,6 +518,9 @@ public class AnalysisUtil {
 				for (Map.Entry<String, List<Statement>> entry : set) {
 					String key = entry.getKey();
 					List<Statement> path = entry.getValue();
+					if (path == null) {
+						texts.put(key, null);// insensitive text
+					}
 					List<Statement> tempPath = new LinkedList<Statement>();
 					Statement connector = fs.get(0);
 					String connectorSig = "";
