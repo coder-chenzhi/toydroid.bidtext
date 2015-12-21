@@ -263,7 +263,7 @@ public class TextAnalysis {
 				}
 			} else if (containsKeywords(str.toLowerCase())) {
 				f.add(str);
-				toRemove.add(str);
+				// toRemove.add(str);//comment for path retrieve
 			}
 		}
 		for (String s : toRemove) {
