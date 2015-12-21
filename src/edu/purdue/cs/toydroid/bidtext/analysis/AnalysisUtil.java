@@ -53,6 +53,8 @@ public class AnalysisUtil {
 
 	private static Map<String, Integer> activity2Layout = new HashMap<String, Integer>();
 
+	private static InterestingNode latestInterestingNode = null;
+
 	public static void associateLayout2Activity(
 			SSAAbstractInvokeInstruction instr, CGNode cgNode) {
 		String act = instr.getDeclaredTarget()
@@ -77,6 +79,7 @@ public class AnalysisUtil {
 			ClassHierarchy cha) {
 		String sig = WalaUtil.getSignature(instr);
 		String intestringIndices = AnalysisConfig.getPotentialSink(sig);
+		latestInterestingNode = null;
 		if (intestringIndices != null) {
 			InterestingNode node = InterestingNode.getInstance(instr, sg,
 					intestringIndices);
@@ -93,9 +96,14 @@ public class AnalysisUtil {
 							.toString(), sg.cgNode.getMethod()
 							.getName()
 							.toString());
+			latestInterestingNode = node;
 			return 2;
 		}
 		return 0;
+	}
+
+	public static InterestingNode getLatestInterestingNode() {
+		return latestInterestingNode;
 	}
 
 	/**
