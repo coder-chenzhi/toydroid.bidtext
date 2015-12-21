@@ -60,6 +60,7 @@ import com.ibm.wala.viz.DotUtil;
 
 import edu.purdue.cs.toydroid.bidtext.TextLeak;
 import edu.purdue.cs.toydroid.bidtext.analysis.AnalysisUtil;
+import edu.purdue.cs.toydroid.bidtext.analysis.InterestingNode;
 import edu.purdue.cs.toydroid.bidtext.analysis.SpecialModel;
 import edu.purdue.cs.toydroid.utils.SimpleCounter;
 import edu.purdue.cs.toydroid.utils.WalaUtil;
@@ -878,6 +879,15 @@ public class TypingGraphUtil {
 			// if (apiConstraint != TypingConstraint.GE_UNIDIR)
 			defRec.addBackwardTypingConstraint(c);
 		}
+		
+		InterestingNode sink = AnalysisUtil.getLatestInterestingNode();
+		if (apiType == 2 && sink != null) {
+			Iterator<TypingNode> sinkArgs = sink.iterateInterestingArgs();
+			while (sinkArgs.hasNext()) {
+				TypingNode t = sinkArgs.next();
+				t.markSpecial();
+			}
+		}
 	}
 
 	private static void handleStringBuilderAppend(CGNode cgNode,
@@ -1232,6 +1242,7 @@ public class TypingGraphUtil {
 		List<TypingRecord> worklist = new LinkedList<TypingRecord>();
 		// PASS 1: forward
 		initWorklistPassOne(worklist);
+		currentTypingGraph.simplify();
 		while (!worklist.isEmpty()) {
 			TypingRecord rec = worklist.remove(0);
 			propagateOneRecordForward(rec, worklist);
