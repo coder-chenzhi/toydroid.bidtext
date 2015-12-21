@@ -46,6 +46,37 @@ public class TextAnalysis {
 		text2Path = new HashMap<String, List<Statement>>();
 	}
 
+	public static boolean maybeKeyword(String str) {
+		if (str == null || str.isEmpty()) {
+			return false;
+		}
+		if (str.equals("location") || str.equals("gps")
+				|| str.equals("network") || str.equals("android_id")) {
+			return true;
+		}
+		if (str.startsWith("android.")) {
+			return false;
+		}
+		if (str.startsWith("http:") || str.startsWith("https:")
+				|| str.startsWith("/")) {
+			int idx = str.indexOf('?');
+			if (idx > 0 && str.length() > idx) {
+				String s = str.substring(idx + 1);
+				if (keywordPattern.matcher(s).find()) {
+					return true;
+				}
+			}
+		} else if (!str.contains(" ")) {
+			str = splitWord(str);
+			if (keywordPattern.matcher(str).find()) {
+				return true;
+			}
+		} else if (keywordPattern.matcher(str).find()) {
+			return true;
+		}
+		return false;
+	}
+
 	public Map<String, List<Statement>> getText2Path() {
 		return text2Path;
 	}
@@ -241,7 +272,7 @@ public class TextAnalysis {
 		return f;
 	}
 
-	private String splitWord(String src) {
+	private static String splitWord(String src) {
 		StringBuilder builder = new StringBuilder(src);
 		int s = builder.length();
 		int idx = 0;
