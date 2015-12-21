@@ -4,6 +4,8 @@ import java.util.*;
 
 import com.ibm.wala.ipa.slicer.Statement;
 
+import edu.purdue.cs.toydroid.bidtext.analysis.TextAnalysis;
+
 public class TypingRecord {
 	public static final String APPEND_PREFIX = "{[<";
 	public static final String APPEND_POSTFIX = ">]}";
@@ -67,9 +69,13 @@ public class TypingRecord {
 		for (Map.Entry<String, List<Statement>> entry : set) {
 			String key = entry.getKey();
 			if (!localTexts.containsKey(key)) {
-				List<Statement> list = new LinkedList<Statement>();
-				list.addAll(entry.getValue());
-				list.addAll(path);
+				List<Statement> existingPath = entry.getValue();
+				List<Statement> list = null;
+				if (existingPath != null) {
+					list = new LinkedList<Statement>();
+					list.addAll(existingPath);
+					list.addAll(path);
+				}
 				localTexts.put(key, list);
 			}
 		}
@@ -203,7 +209,10 @@ public class TypingRecord {
 	public boolean addTypingText(String s) {
 		Map<String, List<Statement>> m = typingTexts;
 		if (!m.containsKey(s)) {
-			List<Statement> l = new LinkedList<Statement>();
+			List<Statement> l = null;
+			if (TextAnalysis.maybeKeyword(s)) {
+				l = new LinkedList<Statement>();
+			}
 			m.put(s, l);
 			return true;
 		}
