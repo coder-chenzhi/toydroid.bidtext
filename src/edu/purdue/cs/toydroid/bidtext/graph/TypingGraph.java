@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -219,5 +221,64 @@ public class TypingGraph {
 
 	public Set<TypingNode> getTypingClass(TypingNode node) {
 		return null;
+	}
+
+	public void simplify() {
+		int oSize = nodeManager.getNumberOfNodes();
+		List<TypingNode> worklist = new LinkedList<TypingNode>();
+		Iterator<TypingNode> iter = iterateNodes();
+		while (iter.hasNext()) {
+			TypingNode tn = iter.next();
+			if (tn.isConstant() || tn.isField() || tn.isSpecialNode()) {
+				continue;
+			}
+			int nodeId = tn.getGraphNodeId();
+			TypingRecord rec = getTypingRecord(nodeId);
+			if (rec == null
+					|| (!rec.hasConstants() && !rec.hasForwardConstraints())) {
+				worklist.add(tn);
+			}
+		}
+		while (!worklist.isEmpty()) {
+			TypingNode tn = worklist.remove(0);
+			TypingRecord rec = getTypingRecord(tn.getGraphNodeId());
+			if (rec != null) {
+				Set<TypingConstraint> cons = rec.getBackwardTypingConstraints();
+				Set<TypingConstraint> toRemove = new HashSet<TypingConstraint>();
+				for (TypingConstraint rc : cons) {
+					TypingRecord nrec = getTypingRecord(rc.rhs);
+					if (nrec != null) {
+						Set<TypingConstraint> fwd = nrec.getForwardTypingConstraints();
+						for (TypingConstraint c : fwd) {
+							if (c.lhs == tn.getGraphNodeId()) {
+								toRemove.add(c);
+							}
+						}
+						fwd.removeAll(toRemove);
+
+						TypingNode ntn = getNode(rc.rhs);
+						if (ntn != null) {
+							if (!ntn.isConstant() && !ntn.isField()
+									&& !ntn.isSpecialNode()
+									&& !nrec.hasForwardConstraints()
+									&& !nrec.hasConstants()) {
+								worklist.add(ntn);
+							}
+						}
+					}
+					toRemove.clear();
+				}
+				toRemove = null;
+				removeTypingRecord(tn.getGraphNodeId());
+			}
+			nodeManager.removeNode(tn);
+		}
+		logger.info("     - Simplifying Typing Graph: {} -> {}", oSize,
+				nodeManager.getNumberOfNodes());
+	}
+
+	private void removeTypingRecord(int nodeId) {
+		SimpleGraphNode sgn = SimpleGraphNode.make(nodeId);
+		node2Typing.remove(sgn);
 	}
 }
