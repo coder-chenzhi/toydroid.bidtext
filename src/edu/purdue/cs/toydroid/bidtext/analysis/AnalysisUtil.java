@@ -520,6 +520,7 @@ public class AnalysisUtil {
 					List<Statement> path = entry.getValue();
 					if (path == null) {
 						texts.put(key, null);// insensitive text
+						continue;
 					}
 					List<Statement> tempPath = new LinkedList<Statement>();
 					Statement connector = fs.get(0);
