@@ -237,18 +237,18 @@ public class TextLeak implements Callable<TextLeak> {
 			// entrypoint.getMethod().getName().toString() + ".dot", null,
 			// null);
 			// }
-			SDGCache sdgCache = new SDGCache(entrypoint);
-			sdgCache.buildCache(g, cha);
-			SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
+			// SDGCache sdgCache = new SDGCache(entrypoint);
+			// sdgCache.buildCache(g, cha);
+			// SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
 			// DotUtil.dotify(simSDG, WalaUtil.makeNodeDecorator(),
 			// entrypoint.getMethod().getName().toString() + ".s.dot",
 			// null, null);
-			if (simSDG == null) {
-				logger.info(" * Empty SDG. No interesting stmt found.");
-			} else {
-				logger.info(" * Build TypingGraph");
-				TypingGraphUtil.buildTypingGraph(entrypoint, cg, simSDG, cha);
-			}
+			// if (simSDG == null) {
+			// logger.info(" * Empty SDG. No interesting stmt found.");
+			// } else {
+			logger.info(" * Build TypingGraph");
+			TypingGraphUtil.buildTypingGraph(entrypoint, cg, g, cha);
+			// }
 			epList.clear();
 		}
 
