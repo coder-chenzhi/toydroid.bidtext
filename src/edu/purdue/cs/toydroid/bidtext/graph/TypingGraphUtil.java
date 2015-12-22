@@ -153,6 +153,9 @@ public class TypingGraphUtil {
 		graph.updateFieldTypingRecords();
 		logger.info("   - Propagate Typing");
 		propagate();
+		// clear typing graph at the end - remove usused data for memory
+		// efficiency
+		graph.clearAtEnd();
 	}
 
 	// ///////////////////////////
