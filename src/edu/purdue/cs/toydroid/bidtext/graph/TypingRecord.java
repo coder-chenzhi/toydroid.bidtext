@@ -297,4 +297,21 @@ public class TypingRecord {
 	public Map<SimpleGraphNode, List<Statement>> getOutputFields() {
 		return outputFields;
 	}
+
+	public void endOfLife(boolean all) {
+		if (all) {
+			typingTexts.clear();
+			typingTexts = null;
+			typingConstants = null;
+			inputFields.clear();
+			inputFields = null;
+			outputFields.clear();
+			outputFields = null;
+		}
+		forwardConstraints.clear();
+		forwardConstraints = null;
+		backwardConstraints.clear();
+		backwardConstraints = null;
+		appendResults = null;
+	}
 }
