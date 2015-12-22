@@ -281,4 +281,30 @@ public class TypingGraph {
 		SimpleGraphNode sgn = SimpleGraphNode.make(nodeId);
 		node2Typing.remove(sgn);
 	}
+
+	/**
+	 * 
+	 * @return TRUE - some nodes are maintained; FALSE - no nodes.
+	 */
+	public boolean clearAtEnd() {
+		Iterator<TypingNode> iter = iterateNodes();
+		while (iter.hasNext()) {
+			TypingNode tn = iter.next();
+			TypingRecord rec = getTypingRecord(tn.getGraphNodeId());
+			if ((tn.isField() || tn.isSpecialNode()) && (rec != null)) {
+				rec.endOfLife(false);
+				continue;
+			}
+			if (rec != null) {
+				rec.endOfLife(true);
+			}
+			removeTypingRecord(tn.getGraphNodeId());
+			nodeManager.removeNode(tn);
+		}
+		possibleExternalInput = null;
+		subGraphs.clear(); // no use later
+		subGraphs = null;
+		// System.gc();
+		return nodeManager.getNumberOfNodes() > 0;
+	}
 }
