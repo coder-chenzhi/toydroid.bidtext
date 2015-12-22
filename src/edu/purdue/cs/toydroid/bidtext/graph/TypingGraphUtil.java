@@ -879,7 +879,7 @@ public class TypingGraphUtil {
 			// if (apiConstraint != TypingConstraint.GE_UNIDIR)
 			defRec.addBackwardTypingConstraint(c);
 		}
-		
+
 		InterestingNode sink = AnalysisUtil.getLatestInterestingNode();
 		if (apiType == 2 && sink != null) {
 			Iterator<TypingNode> sinkArgs = sink.iterateInterestingArgs();
@@ -1242,7 +1242,7 @@ public class TypingGraphUtil {
 		List<TypingRecord> worklist = new LinkedList<TypingRecord>();
 		// PASS 1: forward
 		initWorklistPassOne(worklist);
-		currentTypingGraph.simplify();
+		// currentTypingGraph.simplify();
 		while (!worklist.isEmpty()) {
 			TypingRecord rec = worklist.remove(0);
 			propagateOneRecordForward(rec, worklist);
