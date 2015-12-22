@@ -21,7 +21,7 @@ public class TypingNode extends NodeWithNumber {
 	public static final int FIELD = 0x8;
 	public static final int IFIELD = 0x10; // instance field
 	public static final int SFIELD = 0x20; // static field
-	private static boolean isSpecial = false;
+	private boolean isSpecial = false;
 
 	public int kind;
 	public CGNode cgNode; // the enclosing CGNode
