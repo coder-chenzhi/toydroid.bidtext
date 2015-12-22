@@ -223,6 +223,12 @@ public class TypingGraph {
 		return null;
 	}
 
+	/**
+	 * *Do NOT use this method*. The implementation has problems - which nodes
+	 * can be removed. In addition, after simplifying, some records still has
+	 * constraints to the removed records that do not exist, causing
+	 * NullPointerException somewhere.
+	 */
 	public void simplify() {
 		int oSize = nodeManager.getNumberOfNodes();
 		List<TypingNode> worklist = new LinkedList<TypingNode>();
