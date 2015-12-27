@@ -418,7 +418,7 @@ public class TypingGraphUtil {
 		if (nSucc == 0) { // API call?
 			SSAAbstractInvokeInstruction inst = pcstmt.getInstruction();
 			if (!inst.hasDef()) {
-				AnalysisUtil.associateLayout2Activity(inst, cgNode);
+				// AnalysisUtil.associateLayout2Activity(inst, cgNode);
 				handleSSAInvokeAPI(cgNode, stmt, inst, sg);
 			}
 			// hasDef(): left to be processed in NormalRetCaller?
