@@ -1250,27 +1250,40 @@ public class TypingGraphUtil {
 			TypingRecord rec = worklist.remove(0);
 			propagateOneRecordForward(rec, worklist);
 		}
-		while (true) {
-			boolean changed = false;
-			// PASS 2: backward
-			initWorklistPassTwo(worklist);
-			while (!worklist.isEmpty()) {
-				TypingRecord rec = worklist.remove(0);
-				changed = changed | propagateOneRecordBackward(rec, worklist);
-			}
-			if (!changed) {
-				break;
-			}
-			// PASS 3: forward
-			initWorklistPassThree(worklist);
-			while (!worklist.isEmpty()) {
-				TypingRecord rec = worklist.remove(0);
-				changed = changed | propagateOneRecordForward(rec, worklist);
-			}
-			if (!changed) {
-				break;
+		// PASS 2: forward & backward
+		initWorklistPassTwo(worklist);
+		while (!worklist.isEmpty()) {
+			TypingRecord rec = worklist.remove(0);
+			propagateOneRecordBackward(rec, worklist);
+			propagateOneRecordForward(rec, worklist);
+			TypingNode node = currentTypingGraph.getNode(rec.initialId);
+			if (node != null && !(node.isField() || node.isSpecialNode())) {
+				rec.emptyThePaths();
 			}
 		}
+		// // old implementation which cannot leverage emptyThePaths to improve
+		// // memory efficiency
+		// while (true) {
+		// boolean changed = false;
+		// // PASS 2: backward
+		// initWorklistPassTwo(worklist);
+		// while (!worklist.isEmpty()) {
+		// TypingRecord rec = worklist.remove(0);
+		// changed = changed | propagateOneRecordBackward(rec, worklist);
+		// }
+		// if (!changed) {
+		// break;
+		// }
+		// // PASS 3: forward
+		// initWorklistPassThree(worklist);
+		// while (!worklist.isEmpty()) {
+		// TypingRecord rec = worklist.remove(0);
+		// changed = changed | propagateOneRecordForward(rec, worklist);
+		// }
+		// if (!changed) {
+		// break;
+		// }
+		// }
 	}
 
 	private static void initWorklistPassOne(List<TypingRecord> worklist) {
@@ -1509,7 +1522,9 @@ public class TypingGraphUtil {
 							Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = tmp.entrySet();
 							for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
 								List<Statement> path = entry.getValue();
-								path.addAll(tc0.getPath());
+								if (path != null) {
+									path.addAll(tc0.getPath());
+								}
 							}
 						} else if (input0.isEmpty() || input1.isEmpty()) {
 							Map<SimpleGraphNode, List<Statement>> empty, nonEmpty;
@@ -1530,7 +1545,9 @@ public class TypingGraphUtil {
 								Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = empty.entrySet();
 								for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
 									List<Statement> path = entry.getValue();
-									path.addAll(tc0.getPath());
+									if (path != null) {
+										path.addAll(tc0.getPath());
+									}
 								}
 								if (isZero)
 									changed0 = true;
@@ -1550,7 +1567,9 @@ public class TypingGraphUtil {
 							Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = tmp.entrySet();
 							for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
 								List<Statement> path = entry.getValue();
-								path.addAll(tc0.getPath());
+								if (path != null) {
+									path.addAll(tc0.getPath());
+								}
 							}
 						} else if (output0.isEmpty() || output1.isEmpty()) {
 							Map<SimpleGraphNode, List<Statement>> empty, nonEmpty;
@@ -1571,7 +1590,9 @@ public class TypingGraphUtil {
 								Set<Map.Entry<SimpleGraphNode, List<Statement>>> set = empty.entrySet();
 								for (Map.Entry<SimpleGraphNode, List<Statement>> entry : set) {
 									List<Statement> path = entry.getValue();
-									path.addAll(tc0.getPath());
+									if (path != null) {
+										path.addAll(tc0.getPath());
+									}
 								}
 								if (isZero)
 									changed0 = true;
