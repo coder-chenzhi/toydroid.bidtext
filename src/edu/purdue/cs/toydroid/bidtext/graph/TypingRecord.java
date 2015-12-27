@@ -314,4 +314,37 @@ public class TypingRecord {
 		backwardConstraints = null;
 		appendResults = null;
 	}
+
+	public void emptyThePaths() {
+		Map<String, List<Statement>> localTexts = typingTexts;
+		Map<SimpleGraphNode, List<Statement>> localInputs = inputFields;
+		Map<SimpleGraphNode, List<Statement>> localOutputs = outputFields;
+		Set<Map.Entry<String, List<Statement>>> texts = localTexts.entrySet();
+		for (Map.Entry<String, List<Statement>> entry : texts) {
+			String key = entry.getKey();
+			List<Statement> path = entry.getValue();
+			if (path != null) {
+				path.clear();
+			}
+			localTexts.put(key, null);// the path is useless later
+		}
+		Set<Map.Entry<SimpleGraphNode, List<Statement>>> inputs = localInputs.entrySet();
+		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : inputs) {
+			SimpleGraphNode key = entry.getKey();
+			List<Statement> path = entry.getValue();
+			if (path != null) {
+				path.clear();
+			}
+			localInputs.put(key, null);
+		}
+		Set<Map.Entry<SimpleGraphNode, List<Statement>>> outputs = localOutputs.entrySet();
+		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : outputs) {
+			SimpleGraphNode key = entry.getKey();
+			List<Statement> path = entry.getValue();
+			if (path != null) {
+				path.clear();
+			}
+			localOutputs.put(key, null);
+		}
+	}
 }
