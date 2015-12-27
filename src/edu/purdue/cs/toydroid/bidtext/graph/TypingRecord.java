@@ -80,14 +80,20 @@ public class TypingRecord {
 			}
 		}
 		typingConstants.addAll(rec.typingConstants);
+		// with emptyThePaths, sometimes the existing paths is null. the cause
+		// is not checked. should be verified in future.
 		// input fields
 		Set<Map.Entry<SimpleGraphNode, List<Statement>>> fieldSet = rec.inputFields.entrySet();
 		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
 			SimpleGraphNode key = entry.getKey();
 			if (!localInputs.containsKey(key)) {
-				List<Statement> list = new LinkedList<Statement>();
-				list.addAll(entry.getValue());
-				list.addAll(path);
+				List<Statement> existingPath = entry.getValue();
+				List<Statement> list = null;
+				if (existingPath != null) {
+					list = new LinkedList<Statement>();
+					list.addAll(entry.getValue());
+					list.addAll(path);
+				}
 				localInputs.put(key, list);
 			}
 		}
@@ -96,9 +102,13 @@ public class TypingRecord {
 		for (Map.Entry<SimpleGraphNode, List<Statement>> entry : fieldSet) {
 			SimpleGraphNode key = entry.getKey();
 			if (!localOutputs.containsKey(key)) {
-				List<Statement> list = new LinkedList<Statement>();
-				list.addAll(entry.getValue());
-				list.addAll(path);
+				List<Statement> existingPath = entry.getValue();
+				List<Statement> list = null;
+				if (existingPath != null) {
+					list = new LinkedList<Statement>();
+					list.addAll(entry.getValue());
+					list.addAll(path);
+				}
 				localOutputs.put(key, list);
 			}
 		}
