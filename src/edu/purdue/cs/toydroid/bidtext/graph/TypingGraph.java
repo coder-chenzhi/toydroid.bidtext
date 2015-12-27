@@ -87,6 +87,10 @@ public class TypingGraph {
 		return nodeManager.getNode(n);
 	}
 
+	public int getNumberOfNodes() {
+		return nodeManager.getNumberOfNodes();
+	}
+
 	public Iterator<TypingNode> iterateNodes() {
 		return nodeManager.iterator();
 	}
