@@ -28,6 +28,7 @@ import com.ibm.wala.ssa.SSAInstruction;
 import com.ibm.wala.ssa.SymbolTable;
 import com.ibm.wala.util.graph.Graph;
 
+import edu.purdue.cs.toydroid.utils.AnalysisConfig;
 import edu.purdue.cs.toydroid.utils.WalaUtil;
 
 public class SDGCache {
@@ -35,15 +36,117 @@ public class SDGCache {
 	private Entrypoint entry;
 	private Map<CGNode, SDGSubCache> cg2cache;
 	private List<Statement> cachedStmt;
+	private Set<Statement> potentialStmts;
 
 	public SDGCache(Entrypoint e) {
 		entry = e;
 		cg2cache = new HashMap<CGNode, SDGSubCache>();
 		cachedStmt = new LinkedList<Statement>();
+		potentialStmts = new HashSet<Statement>();
 	}
 
 	public Entrypoint entrypoint() {
 		return entry;
+	}
+
+	private void checkSink(Statement stmt, SSAAbstractInvokeInstruction instr) {
+		String sig = WalaUtil.getSignature(instr);
+		if (null != AnalysisConfig.getPotentialSink(sig)) {
+			potentialStmts.add(stmt);
+		}
+	}
+
+	public boolean hasPotentialInteresting() {
+		return !potentialStmts.isEmpty();
+	}
+
+	public boolean isPotentialInteresting(Statement stmt) {
+		return potentialStmts.contains(stmt);
+	}
+
+	public void buildSimpleCache(Graph<Statement> sdg, ClassHierarchy cha) {
+		logger.info("   * Build SDG Cache...");
+		for (Statement stmt : sdg) {
+			Statement.Kind k = stmt.getKind();
+			CGNode cgn = stmt.getNode();
+			SSAInstruction inst;
+			int nUses, idx;
+			switch (k) {
+				case NORMAL:
+					NormalStatement nstmt = (NormalStatement) stmt;
+					inst = nstmt.getInstruction();
+					if (inst instanceof SSAFieldAccessInstruction) {
+						potentialStmts.add(stmt);
+					}
+					break;
+				case PARAM_CALLER:
+					ParamCaller pcaller = (ParamCaller) stmt;
+					int value = pcaller.getValueNumber();
+					if (0 == sdg.getSuccNodeCount(stmt)
+							&& WalaUtil.isAPI(pcaller)) {
+						addCache(cgn, value, stmt);
+						checkSink(stmt, pcaller.getInstruction());
+					}
+					break;
+				case NORMAL_RET_CALLER:
+					NormalReturnCaller nrc = (NormalReturnCaller) stmt;
+					inst = nrc.getInstruction();
+					nUses = inst.getNumberOfUses();
+					if (0 == sdg.getPredNodeCount(stmt) && WalaUtil.isAPI(nrc)) {
+						for (idx = 0; idx < nUses; idx++) {
+							int use = inst.getUse(idx);
+							addCache(cgn, use, stmt);
+						}
+						checkSink(stmt, nrc.getInstruction());
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		if (!potentialStmts.isEmpty()) {
+			buildSimpleCacheHelper(sdg);
+		}
+		logger.info("   * # of potential interesting stmts: {}",
+				potentialStmts.size());
+	}
+
+	private void buildSimpleCacheHelper(Graph<Statement> sdg) {
+		Set<Statement> pStmts = potentialStmts;
+		List<Statement> worklist = new LinkedList<Statement>();
+		worklist.addAll(pStmts);
+		while (!worklist.isEmpty()) {
+			Statement stmt = worklist.remove(0);
+			Iterator<Statement> iter = sdg.getPredNodes(stmt);
+			while (iter.hasNext()) {
+				Statement pred = iter.next();
+				if (!pStmts.contains(pred)) {
+					pStmts.add(pred);
+					worklist.add(pred);
+				}
+			}
+			iter = sdg.getSuccNodes(stmt);
+			while (iter.hasNext()) {
+				Statement succ = iter.next();
+				if (!pStmts.contains(succ)) {
+					pStmts.add(succ);
+					worklist.add(succ);
+				}
+			}
+			if (stmt instanceof ParamCaller
+					|| stmt instanceof NormalReturnCaller) {
+				List<Statement> cache = getCache(stmt);
+				if (cache != null) {
+					while (!cache.isEmpty()) {
+						Statement c = cache.remove(0);
+						if (!pStmts.contains(c)) {
+							pStmts.add(c);
+							worklist.add(c);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void buildCache(Graph<Statement> sdg, ClassHierarchy cha) {
