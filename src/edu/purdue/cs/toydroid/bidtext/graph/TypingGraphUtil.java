@@ -812,12 +812,13 @@ public class TypingGraphUtil {
 				|| apiSig.startsWith("java.lang.StringBuilder.<init>(Ljava/")) {
 			if ((stmt.getKind() == Kind.PARAM_CALLER && ((ParamCaller) stmt).getValueNumber() == inst.getUse(1))
 					|| stmt.getKind() == Kind.NORMAL_RET_CALLER) {
-				handleStringBuilderAppend(cgNode, defNode, defRec, thisNode,
-						thisRec, sg.find(inst.getUse(1)));
+				handleStringBuilderAppend(stmt, cgNode, defNode, defRec,
+						thisNode, thisRec, sg.find(inst.getUse(1)));
 			}
 			return;
 		} else if (apiSig.startsWith("java.lang.StringBuilder.toString(")) {
-			handleStringBuilderToString(defNode, defRec, thisNode, thisRec);
+			handleStringBuilderToString(stmt, defNode, defRec, thisNode,
+					thisRec);
 			return;
 		}
 		String sig = WalaUtil.getSignature(inst);
@@ -900,9 +901,9 @@ public class TypingGraphUtil {
 		}
 	}
 
-	private static void handleStringBuilderAppend(CGNode cgNode,
-			TypingNode defNode, TypingRecord defRec, TypingNode thisNode,
-			TypingRecord thisRec, TypingNode paramNode) {
+	private static void handleStringBuilderAppend(Statement stmt,
+			CGNode cgNode, TypingNode defNode, TypingRecord defRec,
+			TypingNode thisNode, TypingRecord thisRec, TypingNode paramNode) {
 		TypingRecord paramRec = currentTypingGraph.findOrCreateTypingRecord(paramNode.getGraphNodeId());
 		if (paramNode.isConstant()) {
 			String str;
@@ -928,20 +929,24 @@ public class TypingGraphUtil {
 			defRec.addTypingAppend(thisRec);
 			c = new TypingConstraint(defNode.getGraphNodeId(),
 					TypingConstraint.GE_APPEND, paramNode.getGraphNodeId());
+			c.addPath(stmt);
 			paramRec.addForwardTypingConstraint(c);
 			defRec.addBackwardTypingConstraint(c);
 			c = new TypingConstraint(defNode.getGraphNodeId(),
 					TypingConstraint.GE_APPEND, thisNode.getGraphNodeId());
+			c.addPath(stmt);
 			thisRec.addForwardTypingConstraint(c);
 			defRec.addBackwardTypingConstraint(c);
 		}
 	}
 
-	private static void handleStringBuilderToString(TypingNode defNode,
-			TypingRecord defRec, TypingNode thisNode, TypingRecord thisRec) {
+	private static void handleStringBuilderToString(Statement stmt,
+			TypingNode defNode, TypingRecord defRec, TypingNode thisNode,
+			TypingRecord thisRec) {
 		if (defRec != null) {
 			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
 					TypingConstraint.EQ, thisNode.getGraphNodeId());
+			c.addPath(stmt);
 			thisRec.addForwardTypingConstraint(c);
 			defRec.addBackwardTypingConstraint(c);
 		}
@@ -980,7 +985,7 @@ public class TypingGraphUtil {
 			if (rightIdx == -1) {
 				rightNode = defNode;
 				rightRec = defRec;
-			} else if (rightIdx < inst.getNumberOfUses()){
+			} else if (rightIdx < inst.getNumberOfUses()) {
 				use = inst.getUse(rightIdx);
 				rightNode = sg.find(use);
 				if (rightNode != null) {
