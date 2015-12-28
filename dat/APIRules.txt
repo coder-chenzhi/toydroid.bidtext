@@ -1,0 +1,25 @@
+# format: [tag] sig rule1,rule2,...
+
+# no ret->param propagation or propagation between params
+
+[static] android.provider.Settings$Secure.getString(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String; 1=>-1
+
+
+
+[instance] java.lang.String.substring(I)Ljava/lang/String; -1<=>0
+
+[instance] java.util.Map.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
+[instance] java.util.HashMap.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
+[instance] java.util.Map.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
+[instance] java.util.HashMap.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
+[instance] java.util.List.get(I)Ljava/lang/Object; -1<=>0
+[instance] java.util.ArrayList.get(I)Ljava/lang/Object; -1<=>0
+[instance] java.util.LinkedList.get(I)Ljava/lang/Object; -1<=>0
+[instance] java.util.List.remove(I)Ljava/lang/Object; -1<=0
+[instance] java.util.ArrayList.remove(I)Ljava/lang/Object; -1<=0
+[instance] java.util.LinkedList.remove(I)Ljava/lang/Object; -1<=0
+[instance] java.util.List.add(Ljava/lang/Object;)Z 0<=1
+[instance] java.util.ArrayList.add(Ljava/lang/Object;)Z 0<=1
+[instance] java.util.LinkedList.add(Ljava/lang/Object;)Z 0<=1
+
+[instance] org.json.JSONArray.getJSONObject(I)Lorg/json/JSONObject; -1<=>0
