@@ -12,6 +12,8 @@
 [instance] java.util.HashMap.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
 [instance] java.util.Map.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
 [instance] java.util.HashMap.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
+[instance] java.util.Hashtable.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
+[instance] java.util.Hashtable.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
 [instance] java.util.List.get(I)Ljava/lang/Object; -1<=>0
 [instance] java.util.ArrayList.get(I)Ljava/lang/Object; -1<=>0
 [instance] java.util.LinkedList.get(I)Ljava/lang/Object; -1<=>0
@@ -23,3 +25,4 @@
 [instance] java.util.LinkedList.add(Ljava/lang/Object;)Z 0<=1
 
 [instance] org.json.JSONArray.getJSONObject(I)Lorg/json/JSONObject; -1<=>0
+[instance] org.json.JSONArray.length()I 0>=<0
