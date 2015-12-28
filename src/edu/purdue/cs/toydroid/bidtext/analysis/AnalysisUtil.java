@@ -428,40 +428,42 @@ public class AnalysisUtil {
 					}
 				}
 				List<Statement> sgnPath = sources.get(sgn);
-				for (Statement p : sgnPath) {
-					if (p.getKind() == Statement.Kind.NORMAL) {
-						NormalStatement nstmt = (NormalStatement) p;
-						SSAInstruction inst = nstmt.getInstruction();
-						if (isBackward
-								&& inst instanceof SSAGetInstruction
-								&& tn.fieldRef.getSignature()
-										.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
-							startAdd = true;
-						} else if (!isBackward
-								&& inst instanceof SSAPutInstruction
-								&& tn.fieldRef.getSignature()
-										.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
-							startAdd = true;
-						}
-					}
-					if (startAdd) {
-						tempPath.add(p);
-						if (!fieldPath.isEmpty()
-								&& p.getKind() == Statement.Kind.NORMAL) {
+				if (sgnPath != null) {
+					for (Statement p : sgnPath) {
+						if (p.getKind() == Statement.Kind.NORMAL) {
 							NormalStatement nstmt = (NormalStatement) p;
 							SSAInstruction inst = nstmt.getInstruction();
-							if (!isBackward
+							if (isBackward
 									&& inst instanceof SSAGetInstruction
-									&& connectorSig.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
-								endAdd = true;
-							} else if (isBackward
+									&& tn.fieldRef.getSignature()
+											.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
+								startAdd = true;
+							} else if (!isBackward
 									&& inst instanceof SSAPutInstruction
-									&& connectorSig.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
-								endAdd = true;
+									&& tn.fieldRef.getSignature()
+											.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
+								startAdd = true;
 							}
 						}
-						if (endAdd) {
-							break;
+						if (startAdd) {
+							tempPath.add(p);
+							if (!fieldPath.isEmpty()
+									&& p.getKind() == Statement.Kind.NORMAL) {
+								NormalStatement nstmt = (NormalStatement) p;
+								SSAInstruction inst = nstmt.getInstruction();
+								if (!isBackward
+										&& inst instanceof SSAGetInstruction
+										&& connectorSig.equals((((SSAGetInstruction) inst).getDeclaredField().getSignature()))) {
+									endAdd = true;
+								} else if (isBackward
+										&& inst instanceof SSAPutInstruction
+										&& connectorSig.equals((((SSAPutInstruction) inst).getDeclaredField().getSignature()))) {
+									endAdd = true;
+								}
+							}
+							if (endAdd) {
+								break;
+							}
 						}
 					}
 				}
