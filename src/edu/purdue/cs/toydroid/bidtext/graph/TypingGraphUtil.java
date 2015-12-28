@@ -954,7 +954,7 @@ public class TypingGraphUtil {
 		String[] rules = rule.split(",");
 		int nRules = rules.length;
 		int[] ruleRep = new int[3];
-		TypingNode leftNode, rightNode;
+		TypingNode leftNode = null, rightNode = null;
 		TypingRecord leftRec = null, rightRec = null;
 		for (int i = 0; i < nRules; i++) {
 			String R = rules[i].trim();
@@ -966,11 +966,13 @@ public class TypingGraphUtil {
 			int leftIdx = ruleRep[0];
 			int rightIdx = ruleRep[2];
 			int op = ruleRep[1];
+			int use;
 			if (leftIdx == -1) {
 				leftNode = defNode;
 				leftRec = defRec;
-			} else {
-				leftNode = sg.find(leftIdx);
+			} else if (leftIdx < inst.getNumberOfUses()) {
+				use = inst.getUse(leftIdx);
+				leftNode = sg.find(use);
 				if (leftNode != null) {
 					leftRec = currentTypingGraph.findOrCreateTypingRecord(leftNode.getGraphNodeId());
 				}
@@ -978,8 +980,9 @@ public class TypingGraphUtil {
 			if (rightIdx == -1) {
 				rightNode = defNode;
 				rightRec = defRec;
-			} else {
-				rightNode = sg.find(rightIdx);
+			} else if (rightIdx < inst.getNumberOfUses()){
+				use = inst.getUse(rightIdx);
+				rightNode = sg.find(use);
 				if (rightNode != null) {
 					rightRec = currentTypingGraph.findOrCreateTypingRecord(rightNode.getGraphNodeId());
 				}
