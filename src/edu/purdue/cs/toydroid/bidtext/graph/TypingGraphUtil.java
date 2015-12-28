@@ -820,69 +820,75 @@ public class TypingGraphUtil {
 			handleStringBuilderToString(defNode, defRec, thisNode, thisRec);
 			return;
 		}
-		int apiConstraint = TypingConstraint.GE;
-		if (SpecialModel.isSpecialModel(inst)) {
-			// System.err.println(inst);
-			apiConstraint = TypingConstraint.GE_UNIDIR;
-		}
-		for (idx = 0; idx < nFreeVar; idx++) {
-			TypingNode pNode = freeNodes[idx];
-			TypingRecord pRec = currentTypingGraph.findOrCreateTypingRecord(pNode.getGraphNodeId());
-			for (int cdx = 0; cdx < nConstVar; cdx++) {
-				TypingNode cNode = constNodes[cdx];
-				TypingRecord cRec = currentTypingGraph.findOrCreateTypingRecord(cNode.getGraphNodeId());
+		String sig = WalaUtil.getSignature(inst);
+		String apiRule = APIPropagationRules.getRule(sig);
+		if (apiRule != null) {
+			handleAPIByRule(stmt, inst, apiRule, defNode, defRec, sg);
+		} else {
+			int apiConstraint = TypingConstraint.GE;
+			if (SpecialModel.isSpecialModel(inst)) {
+				// System.err.println(inst);
+				apiConstraint = TypingConstraint.GE_UNIDIR;
+			}
+			for (idx = 0; idx < nFreeVar; idx++) {
+				TypingNode pNode = freeNodes[idx];
+				TypingRecord pRec = currentTypingGraph.findOrCreateTypingRecord(pNode.getGraphNodeId());
+				for (int cdx = 0; cdx < nConstVar; cdx++) {
+					TypingNode cNode = constNodes[cdx];
+					TypingRecord cRec = currentTypingGraph.findOrCreateTypingRecord(cNode.getGraphNodeId());
+					TypingConstraint c = new TypingConstraint(
+							pNode.getGraphNodeId(), TypingConstraint.GE,
+							cNode.getGraphNodeId());
+					cRec.addForwardTypingConstraint(c);
+				}
+				if (apiType != 2) {
+					if (thisRec != null) {
+						TypingConstraint c = new TypingConstraint(
+								thisNode.getGraphNodeId(), apiConstraint,
+								pNode.getGraphNodeId());
+						c.addPath(stmt);
+						pRec.addForwardTypingConstraint(c);
+						thisRec.addBackwardTypingConstraint(c);
+					} else if (defRec != null) {
+						TypingConstraint c = new TypingConstraint(
+								defNode.getGraphNodeId(), apiConstraint,
+								pNode.getGraphNodeId());
+						c.addPath(stmt);
+						pRec.addForwardTypingConstraint(c);
+						defRec.addBackwardTypingConstraint(c);
+					}
+				}
+			}
+			if (nFreeVar == 0 && apiType != 2) {
+				for (int cdx = 0; cdx < nConstVar; cdx++) {
+					TypingNode cNode = constNodes[cdx];
+					TypingRecord cRec = currentTypingGraph.findOrCreateTypingRecord(cNode.getGraphNodeId());
+					if (thisRec != null) {
+						TypingConstraint c = new TypingConstraint(
+								thisNode.getGraphNodeId(), TypingConstraint.GE,
+								cNode.getGraphNodeId());
+						c.addPath(stmt);
+						cRec.addForwardTypingConstraint(c);
+					} else if (defRec != null) {
+						TypingConstraint c = new TypingConstraint(
+								defNode.getGraphNodeId(), TypingConstraint.GE,
+								cNode.getGraphNodeId());
+						c.addPath(stmt);
+						cRec.addForwardTypingConstraint(c);
+						// defRec.addBackwardTypingConstraint(c);
+					}
+				}
+			}
+			if (thisRec != null && defRec != null && apiType != 2) {
 				TypingConstraint c = new TypingConstraint(
-						pNode.getGraphNodeId(), TypingConstraint.GE,
-						cNode.getGraphNodeId());
-				cRec.addForwardTypingConstraint(c);
-			}
-			if (apiType != 2) {
-				if (thisRec != null) {
-					TypingConstraint c = new TypingConstraint(
-							thisNode.getGraphNodeId(), apiConstraint,
-							pNode.getGraphNodeId());
-					c.addPath(stmt);
-					pRec.addForwardTypingConstraint(c);
-					thisRec.addBackwardTypingConstraint(c);
-				} else if (defRec != null) {
-					TypingConstraint c = new TypingConstraint(
-							defNode.getGraphNodeId(), apiConstraint,
-							pNode.getGraphNodeId());
-					c.addPath(stmt);
-					pRec.addForwardTypingConstraint(c);
-					defRec.addBackwardTypingConstraint(c);
-				}
+						defNode.getGraphNodeId(), apiConstraint,
+						thisNode.getGraphNodeId());
+				c.addPath(stmt);
+				thisRec.addForwardTypingConstraint(c);
+				// if (apiConstraint != TypingConstraint.GE_UNIDIR)
+				defRec.addBackwardTypingConstraint(c);
 			}
 		}
-		if (nFreeVar == 0 && apiType != 2) {
-			for (int cdx = 0; cdx < nConstVar; cdx++) {
-				TypingNode cNode = constNodes[cdx];
-				TypingRecord cRec = currentTypingGraph.findOrCreateTypingRecord(cNode.getGraphNodeId());
-				if (thisRec != null) {
-					TypingConstraint c = new TypingConstraint(
-							thisNode.getGraphNodeId(), TypingConstraint.GE,
-							cNode.getGraphNodeId());
-					c.addPath(stmt);
-					cRec.addForwardTypingConstraint(c);
-				} else if (defRec != null) {
-					TypingConstraint c = new TypingConstraint(
-							defNode.getGraphNodeId(), TypingConstraint.GE,
-							cNode.getGraphNodeId());
-					c.addPath(stmt);
-					cRec.addForwardTypingConstraint(c);
-					// defRec.addBackwardTypingConstraint(c);
-				}
-			}
-		}
-		if (thisRec != null && defRec != null && apiType != 2) {
-			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
-					apiConstraint, thisNode.getGraphNodeId());
-			c.addPath(stmt);
-			thisRec.addForwardTypingConstraint(c);
-			// if (apiConstraint != TypingConstraint.GE_UNIDIR)
-			defRec.addBackwardTypingConstraint(c);
-		}
-
 		InterestingNode sink = AnalysisUtil.getLatestInterestingNode();
 		if (apiType == 2 && sink != null) {
 			Iterator<TypingNode> sinkArgs = sink.iterateInterestingArgs();
@@ -939,6 +945,65 @@ public class TypingGraphUtil {
 			defRec.addBackwardTypingConstraint(c);
 		}
 
+	}
+
+	private static void handleAPIByRule(Statement stmt,
+			SSAAbstractInvokeInstruction inst, String rule, TypingNode defNode,
+			TypingRecord defRec, TypingSubGraph sg) {
+		String[] rules = rule.split(",");
+		int nRules = rules.length;
+		int[] ruleRep = new int[3];
+		TypingNode leftNode, rightNode;
+		TypingRecord leftRec = null, rightRec = null;
+		for (int i = 0; i < nRules; i++) {
+			String R = rules[i].trim();
+			ruleRep[1] = APIPropagationRules.NOTHING;
+			APIPropagationRules.parseRule(R, ruleRep);
+			if (ruleRep[1] == APIPropagationRules.NOTHING) {
+				continue;
+			}
+			int leftIdx = ruleRep[0];
+			int rightIdx = ruleRep[2];
+			int op = ruleRep[1];
+			if (leftIdx == -1) {
+				leftNode = defNode;
+				leftRec = defRec;
+			} else {
+				leftNode = sg.find(leftIdx);
+				if (leftNode != null) {
+					leftRec = currentTypingGraph.findOrCreateTypingRecord(leftNode.getGraphNodeId());
+				}
+			}
+			if (rightIdx == -1) {
+				rightNode = defNode;
+				rightRec = defRec;
+			} else {
+				rightNode = sg.find(rightIdx);
+				if (rightNode != null) {
+					rightRec = currentTypingGraph.findOrCreateTypingRecord(rightNode.getGraphNodeId());
+				}
+			}
+			if (leftRec != null && rightRec != null) {
+				TypingConstraint c;
+				if (op == APIPropagationRules.LEFT_PROP) {
+					c = new TypingConstraint(leftNode.getGraphNodeId(),
+							TypingConstraint.GE, rightNode.getGraphNodeId());
+					c.addPath(stmt);
+					rightRec.addForwardTypingConstraint(c);
+				} else if (op == APIPropagationRules.RIGHT_PROP) {
+					c = new TypingConstraint(rightNode.getGraphNodeId(),
+							TypingConstraint.GE, leftNode.getGraphNodeId());
+					c.addPath(stmt);
+					leftRec.addForwardTypingConstraint(c);
+				} else { // dual propagation
+					c = new TypingConstraint(leftNode.getGraphNodeId(),
+							TypingConstraint.GE, rightNode.getGraphNodeId());
+					c.addPath(stmt);
+					leftRec.addBackwardTypingConstraint(c);
+					rightRec.addForwardTypingConstraint(c);
+				}
+			}
+		}
 	}
 
 	private static void handleSSAPhi(CGNode cgNode, PhiStatement stmt,
