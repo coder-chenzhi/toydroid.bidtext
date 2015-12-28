@@ -839,6 +839,7 @@ public class TypingGraphUtil {
 					TypingConstraint c = new TypingConstraint(
 							pNode.getGraphNodeId(), TypingConstraint.GE,
 							cNode.getGraphNodeId());
+					c.addPath(stmt);
 					cRec.addForwardTypingConstraint(c);
 				}
 				if (apiType != 2) {
