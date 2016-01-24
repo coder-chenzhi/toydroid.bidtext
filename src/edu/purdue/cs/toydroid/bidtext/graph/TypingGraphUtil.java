@@ -1431,10 +1431,11 @@ public class TypingGraphUtil {
 		Set<TypingConstraint> constraints = record.getForwardTypingConstraints();
 		for (TypingConstraint ct : constraints) {
 			int nextId = ct.lhs;
-			// TypingNode nextNode = currentTypingGraph.getNode(nextId);
+			TypingNode nextNode = currentTypingGraph.getNode(nextId);
 			TypingRecord nextRec = currentTypingGraph.getTypingRecord(nextId);
 			// System.err.println(record.getTypingTexts());
-			if (nextRec.merge(record, ct.getPath())) {
+			if (nextNode != null && !nextNode.isConstant()
+					&& nextRec.merge(record, ct.getPath())) {
 				worklist.add(nextRec);
 				changed = true;
 			}
@@ -1462,16 +1463,21 @@ public class TypingGraphUtil {
 		for (TypingConstraint ct : constraints) {
 			int nextId = ct.rhs;
 			int sym = ct.sym;
+			TypingNode nextNode;
 			TypingRecord nextRec = currentTypingGraph.getTypingRecord(nextId);
 			if (sym == TypingConstraint.EQ || sym == TypingConstraint.GE) {
-				if (nextRec.merge(record, ct.getPath())) {
+				nextNode = currentTypingGraph.getNode(nextId);
+				if (nextNode != null && !nextNode.isConstant()
+						&& nextRec.merge(record, ct.getPath())) {
 					worklist.add(nextRec);
 					changed = true;
 				}
 			} else if (sym == TypingConstraint.GE_ASSIGN) {
 				geAssignList.add(ct);
 			} else if (sym == TypingConstraint.GE_APPEND) {
-				if (nextRec.mergeIfEmptyTexts(record, ct.getPath())) {
+				nextNode = currentTypingGraph.getNode(nextId);
+				if (nextNode != null && !nextNode.isConstant()
+						&& nextRec.mergeIfEmptyTexts(record, ct.getPath())) {
 					worklist.add(nextRec);
 					changed = true;
 				}
@@ -1483,8 +1489,10 @@ public class TypingGraphUtil {
 		int galSize = geAssignList.size();
 		if (galSize == 1) {
 			TypingConstraint c = geAssignList.remove(0);
+			TypingNode nextNode = currentTypingGraph.getNode(c.rhs);
 			TypingRecord nextRec = currentTypingGraph.getTypingRecord(c.rhs);
-			if (nextRec.merge(record, c.getPath())) {
+			if (nextNode != null && !nextNode.isConstant()
+					&& nextRec.merge(record, c.getPath())) {
 				worklist.add(nextRec);
 				changed = true;
 			}
