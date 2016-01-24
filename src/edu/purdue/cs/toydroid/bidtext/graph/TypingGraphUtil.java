@@ -1021,6 +1021,7 @@ public class TypingGraphUtil {
 		int nUse = inst.getNumberOfUses();
 		TypingNode defNode = sg.findOrCreate(def);
 		// logger.info("PHI: {}", inst.toString());
+		Set<Integer> dupSet = new HashSet<Integer>();
 		TypingRecord defRec = sg.typingGraph.findOrCreateTypingRecord(defNode.getGraphNodeId());
 		for (int i = 0; i < nUse; i++) {
 			// logger.info(" i = {}:{}", i, inst.getUse(i));
@@ -1028,6 +1029,10 @@ public class TypingGraphUtil {
 			if (valueNumber == AbstractIntStackMachine.TOP) {
 				continue;
 			}
+			if (!dupSet.contains(valueNumber)) {
+				continue;
+			}
+			dupSet.add(valueNumber);
 			TypingNode useNode = sg.findOrCreate(valueNumber);
 			TypingRecord useRec = sg.typingGraph.findOrCreateTypingRecord(useNode.getGraphNodeId());
 			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
@@ -1037,6 +1042,7 @@ public class TypingGraphUtil {
 			c.addPath(stmt);
 			// currentTypingGraph.mergeClass(useNode, defNode);
 		}
+		dupSet = null;
 	}
 
 	/************************************************************/
