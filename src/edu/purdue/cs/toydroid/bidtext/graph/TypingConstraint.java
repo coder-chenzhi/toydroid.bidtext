@@ -13,6 +13,7 @@ public class TypingConstraint {
 	public static final int GE_UNIDIR = 0x14;// uni-directional for certain APIs
 												// (no backward propagation)
 	public static final int GE_APPEND = 0x18;
+	public static final int GE_PHI = 0x1c;// phi variables
 
 	public int lhs, rhs, sym;
 
