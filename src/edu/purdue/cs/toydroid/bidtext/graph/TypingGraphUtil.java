@@ -1030,7 +1030,7 @@ public class TypingGraphUtil {
 			if (valueNumber == AbstractIntStackMachine.TOP) {
 				continue;
 			}
-			if (!dupSet.contains(valueNumber)) {
+			if (dupSet.contains(valueNumber)) {
 				continue;
 			}
 			dupSet.add(valueNumber);
