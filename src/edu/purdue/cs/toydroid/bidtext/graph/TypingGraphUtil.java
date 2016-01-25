@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.common.util.concurrent.Service.State;
 import com.ibm.wala.analysis.stackMachine.AbstractIntStackMachine;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ipa.callgraph.CallGraph;
@@ -1466,6 +1467,7 @@ public class TypingGraphUtil {
 		boolean changed = false;
 		Set<TypingConstraint> constraints = record.getBackwardTypingConstraints();
 		List<TypingConstraint> geAssignList = new LinkedList<TypingConstraint>();
+		List<TypingConstraint> phiList = new LinkedList<TypingConstraint>();
 		for (TypingConstraint ct : constraints) {
 			int nextId = ct.rhs;
 			int sym = ct.sym;
@@ -1487,6 +1489,8 @@ public class TypingGraphUtil {
 					worklist.add(nextRec);
 					changed = true;
 				}
+			} else if (sym == TypingConstraint.GE_PHI) {
+				phiList.add(ct);
 			}
 			// else if (sym == TypingConstraint.GE_UNIDIR) {
 			// System.err.println(ct.lhs + "  ->- " + nextId);
@@ -1700,6 +1704,116 @@ public class TypingGraphUtil {
 					}
 				}
 			}
+		}
+		if (!phiList.isEmpty()) {
+			changed = backwardPropagateForPhi(record, worklist, phiList)
+					| changed;
+		}
+		return changed;
+	}
+
+	/**
+	 * Propagation for PHI-type relationship.
+	 * 
+	 * x = phi x1, x2, ..., xn, and T(x) = T(x1) \/ T(x2) \/ ... \/ T(xn) \/
+	 * T(y). We propagate T(x) to xi as: T'(xi) = T(x) - \/T(xj)[x!=j], i.e.,
+	 * T'(xi) = T(xi) \/ T(y).
+	 * 
+	 * @param record
+	 * @param worklist
+	 * @param phiList
+	 * @return
+	 */
+	private static boolean backwardPropagateForPhi(TypingRecord record,
+			List<TypingRecord> worklist, List<TypingConstraint> phiList) {
+		Set<String> tmpTexts = new HashSet<String>();
+		Set<Object> tmpConst = new HashSet<Object>();
+		Set<SimpleGraphNode> tmpInputs = new HashSet<SimpleGraphNode>();
+		Set<SimpleGraphNode> tmpOutputs = new HashSet<SimpleGraphNode>();
+		Map<String, List<Statement>> recTexts = record.getTypingTexts();
+		Set<Object> recConsts = record.getTypingConstants();
+		Map<SimpleGraphNode, List<Statement>> recInputs = record.getInputFields();
+		Map<SimpleGraphNode, List<Statement>> recOutputs = record.getOutputFields();
+		int n = phiList.size();
+		TypingConstraint tc;
+		TypingNode tn;
+		boolean changed = false;
+		// store all current states for all phi nodes
+		Set<String> allTexts = new HashSet<String>();
+		Set<Object> allConst = new HashSet<Object>();
+		Set<SimpleGraphNode> allInputs = new HashSet<SimpleGraphNode>();
+		Set<SimpleGraphNode> allOutputs = new HashSet<SimpleGraphNode>();
+		for (int i = 0; i < n; i++) {
+			tc = phiList.get(i);
+			TypingRecord tr = currentTypingGraph.getTypingRecord(tc.rhs);
+			allTexts.addAll(tr.getTypingTexts().keySet());
+			allConst.addAll(tr.getTypingConstants());
+			allInputs.addAll(tr.getInputFields().keySet());
+			allOutputs.addAll(tr.getOutputFields().keySet());
+		}
+		for (int i = 0; i < n; i++) {
+			tc = phiList.get(i);
+			tn = currentTypingGraph.getNode(tc.rhs);
+			if (tn == null || tn.isConstant()) {
+				continue;
+			}
+			TypingRecord tr = currentTypingGraph.getTypingRecord(tc.rhs);
+			tmpTexts.addAll(recTexts.keySet());
+			tmpConst.addAll(recConsts);
+			tmpInputs.addAll(recInputs.keySet());
+			tmpOutputs.addAll(recOutputs.keySet());
+			// remove all states coming from phi nodes; keep only public states
+			tmpTexts.removeAll(allTexts);
+			tmpConst.removeAll(allConst);
+			tmpInputs.removeAll(allInputs);
+			tmpOutputs.removeAll(allOutputs);
+			// propagate remainings to current node
+			Map<String, List<Statement>> targetTexts = tr.getTypingTexts();
+			Set<Object> targetConsts = tr.getTypingConstants();
+			Map<SimpleGraphNode, List<Statement>> targetInputs = tr.getInputFields();
+			Map<SimpleGraphNode, List<Statement>> targetOutputs = tr.getOutputFields();
+			// texts
+			for (String t : tmpTexts) {
+				List<Statement> existingPath = recTexts.get(t);
+				List<Statement> path = null;
+				if (existingPath != null) {
+					path = new LinkedList<Statement>();
+					path.addAll(tc.getPath());
+				}
+				targetTexts.put(t, path);
+			}
+			// constants
+			targetConsts.addAll(tmpConst);
+			// inputs
+			for (SimpleGraphNode sgn : tmpInputs) {
+				List<Statement> existingPath = recInputs.get(sgn);
+				List<Statement> path = null;
+				if (existingPath != null) {
+					path = new LinkedList<Statement>();
+					path.addAll(tc.getPath());
+				}
+				targetInputs.put(sgn, path);
+			}
+			// outputs
+			for (SimpleGraphNode sgn : tmpOutputs) {
+				List<Statement> existingPath = recOutputs.get(sgn);
+				List<Statement> path = null;
+				if (existingPath != null) {
+					path = new LinkedList<Statement>();
+					path.addAll(tc.getPath());
+				}
+				targetOutputs.put(sgn, path);
+			}
+			// check if changed
+			if (!tmpTexts.isEmpty() || !tmpConst.isEmpty()
+					|| !tmpInputs.isEmpty() || !tmpOutputs.isEmpty()) {
+				changed = true;
+				worklist.add(tr);
+			}
+			tmpTexts.clear();
+			tmpConst.clear();
+			tmpInputs.clear();
+			tmpOutputs.clear();
 		}
 		return changed;
 	}
