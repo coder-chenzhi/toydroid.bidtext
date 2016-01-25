@@ -1037,7 +1037,7 @@ public class TypingGraphUtil {
 			TypingNode useNode = sg.findOrCreate(valueNumber);
 			TypingRecord useRec = sg.typingGraph.findOrCreateTypingRecord(useNode.getGraphNodeId());
 			TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
-					TypingConstraint.GE, useNode.getGraphNodeId());
+					TypingConstraint.GE_PHI, useNode.getGraphNodeId());
 			defRec.addBackwardTypingConstraint(c);
 			useRec.addForwardTypingConstraint(c);
 			c.addPath(stmt);
