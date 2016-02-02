@@ -8,12 +8,14 @@
 
 [instance] java.lang.String.substring(I)Ljava/lang/String; -1<=>0
 
-[instance] java.util.Map.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
-[instance] java.util.HashMap.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
-[instance] java.util.Map.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
-[instance] java.util.HashMap.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
-[instance] java.util.Hashtable.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1
-[instance] java.util.Hashtable.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2
+[instance] java.util.Map.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] java.util.HashMap.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] java.util.TreeMap.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] java.util.Map.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2 0<=2
+[instance] java.util.HashMap.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2 0<=2
+[instance] java.util.TreeMap.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2 0<=2
+[instance] java.util.Hashtable.get(Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] java.util.Hashtable.put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; -1<=1 0<=1 1=>2 0<=2
 [instance] java.util.List.get(I)Ljava/lang/Object; -1<=>0
 [instance] java.util.ArrayList.get(I)Ljava/lang/Object; -1<=>0
 [instance] java.util.LinkedList.get(I)Ljava/lang/Object; -1<=>0
@@ -26,3 +28,200 @@
 
 [instance] org.json.JSONArray.getJSONObject(I)Lorg/json/JSONObject; -1<=>0
 [instance] org.json.JSONArray.length()I 0>=<0
+[instance] org.json.JSONObject.has(Ljava/lang/String;)Z 0>=<0
+[instance] org.json.JSONObject.isNull(Ljava/lang/String;)Z 0>=<0
+[instance] org.json.JSONObject.length()I 0>=<0
+[instance] org.json.JSONObject.names()Lorg/json/JSONArray; -1=>0
+
+[instance] org.json.JSONObject.accumulate(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;-1<=1 0<=1 1=>2
+[instance] org.json.JSONObject.get(Ljava/lang/String;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getBoolean(Ljava/lang/String;)Z -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getDouble(Ljava/lang/String;)D -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getInt(Ljava/lang/String;)I -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getLong(Ljava/lang/String;)J -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getString(Ljava/lang/String;)Ljava/lang/String; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getJSONArray(Ljava/lang/String;)Lorg/json/JSONArray; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.getJSONObject(Ljava/lang/String;)Lorg/json/JSONObject; -1<=1 0<=1 -1=>0
+
+[instance] org.json.JSONObject.opt(Ljava/lang/String;)Ljava/lang/Object; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optBoolean(Ljava/lang/String;)Z -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optBoolean(Ljava/lang/String;Z)Z -1<=1 0<=1 1=>2 -1=>0
+[instance] org.json.JSONObject.optDouble(Ljava/lang/String;)D -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optDouble(Ljava/lang/String;D)D -1<=1 0<=1 -1=>0 1=>2
+[instance] org.json.JSONObject.optInt(Ljava/lang/String;)I -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optInt(Ljava/lang/String;I)I -1<=1 0<=1 -1=>0 1=>2
+[instance] org.json.JSONObject.optLong(Ljava/lang/String;)J -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optLong(Ljava/lang/String;J)J -1<=1 0<=1 -1=>0 1=>2
+[instance] org.json.JSONObject.optString(Ljava/lang/String;)Ljava/lang/String; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; -1<=1 0<=1 -1=>0 1=>2
+[instance] org.json.JSONObject.optJSONArray(Ljava/lang/String;)Lorg/json/JSONArray; -1<=1 0<=1 -1=>0
+[instance] org.json.JSONObject.optJSONObject(Ljava/lang/String;)Lorg/json/JSONObject; -1<=1 0<=1 -1=>0
+
+[instance] org.json.JSONObject.put(Ljava/lang/String;I)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+[instance] org.json.JSONObject.put(Ljava/lang/String;J)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+[instance] org.json.JSONObject.put(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+[instance] org.json.JSONObject.put(Ljava/lang/String;Z)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+[instance] org.json.JSONObject.put(Ljava/lang/String;D)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+[instance] org.json.JSONObject.putOpt(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/JSONObject; -1<=1 0<=1 1=>2 0<=2
+
+# todo: ret=>this?
+[instance] android.content.ContentValues.getAsByte(Ljava/lang/String;)Ljava/lang/Byte; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsByteArray(Ljava/lang/String;)[B -1<=1 0<=1
+[instance] android.content.ContentValues.getAsDouble(Ljava/lang/String;)Ljava/lang/Double; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsFloat(Ljava/lang/String;)Ljava/lang/Float; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsInteger(Ljava/lang/String;)Ljava/lang/Integer; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsLong(Ljava/lang/String;)Ljava/lang/Long; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsShort(Ljava/lang/String;)Ljava/lang/Short; -1<=1 0<=1
+[instance] android.content.ContentValues.getAsString(Ljava/lang/String;)Ljava/lang/String; -1<=1 0<=1
+[instance] android.content.ContentValues.get(Ljava/lang/String;)Ljava/lang/Object; -1<=1 0<=1
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/String;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Byte;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Integer;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Float;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Double;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Short;)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;[B)V 0<=1 1=>2
+[instance] android.content.ContentValues.put(Ljava/lang/String;Ljava/lang/Long;)V 0<=1 1=>2
+[instance] android.content.ContentValues.putNull(Ljava/lang/String;)V 0>=<1
+
+
+[instance] org.xml.sax.helpers.DefaultHandler.startElement(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/xml/sax/Attributes;)V 2=>4 3=>4
+
+[instance] org.xml.sax.Attributes.getValue(Ljava/lang/String;)Ljava/lang/String; -1<=1
+[instance] org.xml.sax.Attributes.getValue(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; -1<=2
+
+[instance] android.os.BaseBundle.get(Ljava/lang/String;)Ljava/lang/Object; -1<=1
+[instance] android.os.BaseBundle.putString(Ljava/lang/String;Ljava/lang/String;)V 1=>2
+[instance] android.os.BaseBundle.putInt(Ljava/lang/String;I)V 1=>2
+[instance] android.os.BaseBundle.putDouble(Ljava/lang/String;D)V 1=>2
+[instance] android.os.BaseBundle.putLong(Ljava/lang/String;J)V 1=>2
+[instance] android.os.BaseBundle.putIntArray(Ljava/lang/String;[I)V 1=>2
+[instance] android.os.BaseBundle.putLongArray(Ljava/lang/String;[J)V 1=>2
+[instance] android.os.BaseBundle.putDoubleArray(Ljava/lang/String;[D)V 1=>2
+[instance] android.os.BaseBundle.putStringArray(Ljava/lang/String;[Ljava/lang/String;)V 1=>2
+
+[instance] android.os.BaseBundle.getInt(Ljava/lang/String;)I -1<=1
+[instance] android.os.BaseBundle.getInt(Ljava/lang/String;I)I -1<=1 1=>2
+[instance] android.os.BaseBundle.getLong(Ljava/lang/String;)J -1<=1
+[instance] android.os.BaseBundle.getLong(Ljava/lang/String;J)J -1<=1 1=>2
+[instance] android.os.BaseBundle.getDouble(Ljava/lang/String;)D -1<=1
+[instance] android.os.BaseBundle.getDouble(Ljava/lang/String;D)D -1<=1 1=>2
+[instance] android.os.BaseBundle.getString(Ljava/lang/String;)Ljava/lang/String; -1<=1
+[instance] android.os.BaseBundle.getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; -1<=1 1=>2
+[instance] android.os.BaseBundle.getIntArray(Ljava/lang/String;)[I -1<=1
+[instance] android.os.BaseBundle.getLongArray(Ljava/lang/String;)[J -1<=1
+[instance] android.os.BaseBundle.getDoubleArray(Ljava/lang/String;)[D -1<=1
+[instance] android.os.BaseBundle.getStringArray(Ljava/lang/String;)Ljava/lang/String; -1<=1
+
+[instance] android.os.Bundle.getString(Ljava/lang/String;)Ljava/lang/String; -1<=1
+[instance] android.os.Bundle.putString(Ljava/lang/String;Ljava/lang/String;)V 1=>2
+
+[instance] android.os.Bundle.putCharSequence(Ljava/lang/String;Ljava/lang/CharSequence;)V 1=>2
+[instance] android.os.Bundle.putBoolean(Ljava/lang/String;Z)V 1=>2
+[instance] android.os.Bundle.putByte(Ljava/lang/String;B)V 1=>2
+[instance] android.os.Bundle.putChar(Ljava/lang/String;C)V 1=>2
+[instance] android.os.Bundle.putShort(Ljava/lang/String;S)V 1=>2
+[instance] android.os.Bundle.putFloat(Ljava/lang/String;F)V 1=>2
+[instance] android.os.Bundle.putParcelable(Ljava/lang/String;Landroid/os/Parcelable)V 1=>2
+[instance] android.os.Bundle.putSize(Ljava/lang/String;Landroid/util/Size;)V 1=>2
+[instance] android.os.Bundle.putSizeF(Ljava/lang/String;Landroid/util/SizeF;)V 1=>2
+[instance] android.os.Bundle.putParcelableArray(Ljava/lang/String;[Landroid/os/Parcelable;)V 1=>2
+[instance] android.os.Bundle.putParcelableArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V 1=>2
+[instance] android.os.Bundle.putIntegerArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V 1=>2
+[instance] android.os.Bundle.putStringArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V 1=>2
+[instance] android.os.Bundle.putCharSequenceArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V 1=>2
+[instance] android.os.Bundle.putSerializable(Ljava/lang/String;Ljava/io/Serializable;)V 1=>2
+[instance] android.os.Bundle.putByteArray(Ljava/lang/String;[B)V 1=>2
+[instance] android.os.Bundle.putShortArray(Ljava/lang/String;[S)V 1=>2
+[instance] android.os.Bundle.putCharArray(Ljava/lang/String;[C)V 1=>2
+[instance] android.os.Bundle.putFloatArray(Ljava/lang/String;[F)V 1=>2
+[instance] android.os.Bundle.putCharSequenceArray(Ljava/lang/String;[Ljava/lang/CharSequence;)V 1=>2
+[instance] android.os.Bundle.putBundle(Ljava/lang/String;Landroid/os/Bundle;)V 1=>2
+
+[instance] android.os.Bundle.getBoolean(Ljava/lang/String;)Z -1<=1
+[instance] android.os.Bundle.getBoolean(Ljava/lang/String;B)Z -1<=1 1=>2
+[instance] android.os.Bundle.getByte(Ljava/lang/String;)B -1<=1
+[instance] android.os.Bundle.getByte(Ljava/lang/String;B)Ljava/lang/Byte; -1<=1 1=>2
+[instance] android.os.Bundle.getChar(Ljava/lang/String;)C -1<=1
+[instance] android.os.Bundle.getChar(Ljava/lang/String;C)C -1<=1 1=>2
+[instance] android.os.Bundle.getShort(Ljava/lang/String;)S -1<=1
+[instance] android.os.Bundle.getShort(Ljava/lang/String;S)S -1<=1 1=>2
+[instance] android.os.Bundle.getFloat(Ljava/lang/String;)F -1<=1
+[instance] android.os.Bundle.getFloat(Ljava/lang/String;F)F -1<=1 1=>2
+[instance] android.os.Bundle.getCharSequence(Ljava/lang/String;)Ljava/lang/CharSequence; -1<=1
+[instance] android.os.Bundle.getCharSequence(Ljava/lang/String;Ljava/lang/CharSequence;)Ljava/lang/CharSequence; -1<=1 1=>2
+[instance] android.os.Bundle.getSize(Ljava/lang/String;)Landroid/util/Size; -1<=1
+[instance] android.os.Bundle.getSizeF(Ljava/lang/String;)Landroid/util/SizeF; -1<=1
+[instance] android.os.Bundle.getParcelable(Ljava/lang/String;)Landroid/os/Parcelable; -1<=1
+[instance] android.os.Bundle.getParcelableArray(Ljava/lang/String;)[Landroid/os/Parcelable; -1<=1
+[instance] android.os.Bundle.getParcelableArrayList(Ljava/lang/String;)Ljava/util/ArrayList; -1<=1
+[instance] android.os.Bundle.getSerializable(Ljava/lang/String;)Ljava/io/Serializable; -1<=1
+[instance] android.os.Bundle.getIntegerArrayList(Ljava/lang/String;)Ljava/util/ArrayList; -1<=1
+[instance] android.os.Bundle.getStringArrayList(Ljava/lang/String;)Ljava/util/ArrayList; -1<=1
+[instance] android.os.Bundle.getCharSequenceArrayList(Ljava/lang/String;)Ljava/util/ArrayList; -1<=1
+[instance] android.os.Bundle.getByteArray(Ljava/lang/String;)[B -1<=1
+[instance] android.os.Bundle.getShortArray(Ljava/lang/String;)[S -1<=1
+[instance] android.os.Bundle.getCharArray(Ljava/lang/String;)[C -1<=1
+[instance] android.os.Bundle.getFloatArray(Ljava/lang/String;)[F -1<=1
+[instance] android.os.Bundle.getCharSequenceArray(Ljava/lang/String;)[Ljava/lang/CharSequence; -1<=1
+
+
+[instance] android.app.Activity.getSystemService(Ljava/lang/String;)Ljava/lang/Object; 1=>-1
+[instance] android.content.Context.getSystemService(Ljava/lang/String;)Ljava/lang/Object; 1=>-1
+[instance] android.content.ContextWrapper.getSystemService(Ljava/lang/String;)Ljava/lang/Object; 1=>-1
+[instance] android.location.LocationManager.isProviderEnabled(Ljava/lang/String;)Z 0>=<0
+[instance] android.location.LocationManager.getProvider(Ljava/lang/String;)Landroid/location/LocationProvider; 0=>-1 1=>-1
+[instance] android.location.LocationManager.getLastKnownLocation(Ljava/lang/String;)Landroid/location/Location; 0=>-1 1=>-1
+
+[instance] android.widget.TabHost.newTabSpec(Ljava/lang/String;)Landroid/widget/TabHost$TabSpec; -1>=<1
+
+[instance] android.content.Context.getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences; -1<=1
+[instance] android.content.SharedPreferences.getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String; -1<=1 1=>2
+[instance] android.content.SharedPreferences$Editor.putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor; -1<=1 0<=1 1=>2
+
+[instance] android.database.Cursor.getColumnIndex(Ljava/lang/String;)I -1<=1 0<=1
+[instance] android.database.Cursor.getString(I)Ljava/lang/String; -1<=1 -1=>0
+
+[instance] java.math.BigInteger.<init>(I[B)V  2<=>0
+
+[static] java.lang.String.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 1=>-1 2<=>-1
+[static] java.lang.String.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 0=>-1 1<=>-1
+
+[instance] java.lang.String.charAt(I)C  0<=>-1
+
+[instance] android.content.Intent.getStringExtra(Ljava/lang/String;)Ljava/lang/String; 1=>-1
+
+[instance] java.lang.Object.getClass()Ljava/lang/Class; 0>=<0
+[instance] java.lang.Class.getName()Ljava/lang/String; 0>=<0
+[instance] android.content.Context.getPackageName()Ljava/lang/String; 0>=<0
+[instance] android.content.Context.getResources()Landroid/content/res/Resources; 0>=<0
+[instance] android.content.res.AssetManager.open(Ljava/lang/String;)Ljava/io/InputStream; 1=>-1
+[instance] android.support.v7.app.ActionBarActivity.onCreate(Landroid/os/Bundle;)V 0>=<0
+[instance] android.os.Bundle.containsKey(Ljava/lang/String;)Z 1=>0
+
+[instance] java.io.File.<init>(Ljava/io/File;Ljava/lang/String;)V 0>=<0
+[instance] java.io.File.<init>(Ljava/lang/String;Ljava/lang/String;)V 0>=<0
+[instance] java.io.File.<init>(Ljava/lang/String;)V 0>=<0
+
+[instance] org.apache.http.message.AbstractHttpMessage.addHeader(Ljava/lang/String;Ljava/lang/String;)V 1=>2 1=>0 2=>0
+[instance] org.apache.http.message.AbstractHttpMessage.setHeader(Ljava/lang/String;Ljava/lang/String;)V 1=>2 1=>0 2=>0
+
+[instance] android.database.sqlite.SQLiteDatabase.query(Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor; 1=>-1 2=>-1 3=>-1 4=>-1 5=>-1 6=>-1 7=>-1
+[instance] android.database.sqlite.SQLiteDatabase.query(Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor; 1=>-1 2=>-1 3=>-1 4=>-1 5=>-1 6=>-1 7=>-1
+[instance] android.database.sqlite.SQLiteQueryBuilder.query(Landroid/sqlite/SQLiteDatabase;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor; 2=>-1 3=>-1 4=>-1 5=>-1 6=>-1 7=>-1
+[instance] android.database.sqlite.SQLiteQueryBuilder.query(Landroid/sqlite/SQLiteDatabase;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor; 2=>-1 3=>-1 4=>-1 5=>-1 6=>-1 7=>-1
+
+[instance] android.net.wifi.WifiInfo.getMacAddress()Ljava/lang/String; 0>=<0
+
+[instance] java.net.HttpURLConnection.setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V 0<=1 1=>2
+[instance] java.net.HttpURLConnection.getInputStream()Ljava/io/InputStream; -1>=<0
+[instance] java.net.HttpURLConnection.getOutputStream()Ljava/io/OutputStream; -1>=<0
+[instance] java.net.URLConnection.setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V 0<=1 1=>2
+[instance] java.net.URLConnection.getInputStream()Ljava/io/InputStream; -1>=<0
+[instance] java.net.URLConnection.getOutputStream()Ljava/io/OutputStream; -1>=<0
+[instance] java.net.URLConnection.getRequestProperty(Ljava/lang/String;)Ljava/lang/String; -1<=1 0<=1
+
+
+[instance] org.apache.http.message.BasicNameValuePair.<init>(Ljava/lang/String;Ljava/lang/String;)V 0<=1 1=>2 0<=2
+[instance] org.apache.http.message.BasicNameValuePair.getName()Ljava/lang/String; -1=>0
+[instance] org.apache.http.message.BasicNameValuePair.getValue()Ljava/lang/String; -1<=>0
