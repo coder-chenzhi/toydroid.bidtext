@@ -182,12 +182,12 @@
 [instance] android.database.Cursor.getColumnIndex(Ljava/lang/String;)I -1<=1 0<=1
 [instance] android.database.Cursor.getString(I)Ljava/lang/String; -1<=1 -1=>0
 
-[instance] java.math.BigInteger.<init>(I[B)V  2<=>0
+[instance] java.math.BigInteger.<init>(I[B)V  0<=>2
 
-[static] java.lang.String.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 1=>-1 2<=>-1
-[static] java.lang.String.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 0=>-1 1<=>-1
+#[static] java.lang.String.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 1=>-1 -1<=>2
+[static] java.lang.String.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String; 0=>-1 -1<=>1
 
-[instance] java.lang.String.charAt(I)C  0<=>-1
+[instance] java.lang.String.charAt(I)C  -1<=>0
 
 [instance] android.content.Intent.getStringExtra(Ljava/lang/String;)Ljava/lang/String; 1=>-1
 
