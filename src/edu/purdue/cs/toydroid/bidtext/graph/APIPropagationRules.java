@@ -32,6 +32,7 @@ public class APIPropagationRules {
 		BufferedReader reader = null;
 		try {
 			String line = null;
+			StringBuilder builder = new StringBuilder();
 			reader = new BufferedReader(new FileReader(RuleFile));
 			while ((line = reader.readLine()) != null) {
 				line = line.trim();
@@ -42,7 +43,13 @@ public class APIPropagationRules {
 				if (parts.length < 3) {
 					continue;
 				}
-				sig2rules.put(parts[1], parts[2]);
+				builder.append(parts[2]);
+				for (int i = 3; i < parts.length; i++) {
+					builder.append(',');
+					builder.append(parts[i]);
+				}
+				sig2rules.put(parts[1], builder.toString());
+				builder.delete(0, builder.length());
 			}
 		} catch (Exception e) {
 
