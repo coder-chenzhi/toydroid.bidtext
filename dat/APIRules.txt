@@ -225,3 +225,20 @@
 [instance] org.apache.http.message.BasicNameValuePair.<init>(Ljava/lang/String;Ljava/lang/String;)V 0<=1 1=>2 0<=2
 [instance] org.apache.http.message.BasicNameValuePair.getName()Ljava/lang/String; -1=>0
 [instance] org.apache.http.message.BasicNameValuePair.getValue()Ljava/lang/String; -1<=>0
+
+# some rules for LOG apis, making sure constant value does not type the variable tag
+[static] android.util.Log.d(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.d(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.e(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.i(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.i(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.println(ILjava/lang/String;Ljava/lang/String;)I 1=>2
+[static] android.util.Log.v(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.v(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.w(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.w(Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.wtf(Ljava/lang/String;Ljava/lang/String;)I 0=>1
+[static] android.util.Log.wtf(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I 0=>1
+[static] android.util.Log.wtf(Ljava/lang/String;Ljava/lang/Throwable;)I 0>=<1
