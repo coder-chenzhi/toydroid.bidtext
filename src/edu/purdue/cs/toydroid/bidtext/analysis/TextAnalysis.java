@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.ibm.wala.ipa.slicer.ParamCaller;
 import com.ibm.wala.ipa.slicer.Statement;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -119,8 +120,21 @@ public class TextAnalysis {
 				}
 			}
 			if (texts.containsKey("android_id")) {
+				List<Statement> p = texts.get("android_id");
+				boolean skip = false;
+				if (p != null && p.size() == 2) {
+					Statement s = p.get(0);
+					if (s.getKind() == Statement.Kind.PARAM_CALLER) {
+						ParamCaller pc = (ParamCaller)s;
+						if (pc.getInstruction().getDeclaredTarget().getSignature().startsWith("com.facebook.internal.Utility.logd")){
+							skip = true;
+						}
+					}
+				}
+				if (!skip) {
 				text2Path.put("android_id", texts.remove("android_id"));
 				record("android_id");
+				}
 			}
 		}
 		List<String> f = purify(texts);
