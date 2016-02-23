@@ -1470,6 +1470,12 @@ public class TypingGraphUtil {
 					&& nextRec.merge(record, ct.getPath())) {
 				worklist.add(nextRec);
 				changed = true;
+				if (ct.sym == TypingConstraint.EQ) {
+					TypingNode currNode = currentTypingGraph.getNode(ct.rhs);
+					if (currNode != null && currNode.isConstant()) {
+						nextNode.markFakeConstantKind();
+					}
+				}
 			}
 		}
 		return changed;
