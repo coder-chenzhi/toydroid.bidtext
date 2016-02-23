@@ -21,6 +21,7 @@ public class TypingNode extends NodeWithNumber {
 	public static final int FIELD = 0x8;
 	public static final int IFIELD = 0x10; // instance field
 	public static final int SFIELD = 0x20; // static field
+	public static final int FAKE_STRING = 0x30;
 	private boolean isSpecial = false;
 
 	public int kind;
@@ -73,12 +74,20 @@ public class TypingNode extends NodeWithNumber {
 		return (STRING == (STRING & kind));
 	}
 
+	public boolean isFakeString() {
+		return (FAKE_STRING == (FAKE_STRING & kind));
+	}
+
 	public void markStringKind() {
 		kind = CONSTANT | STRING;
 	}
 
 	public void markConstantKind() {
 		kind = CONSTANT;
+	}
+
+	public void markFakeStringKind() {
+		kind = CONSTANT | FAKE_STRING;
 	}
 
 	public String toString() {
