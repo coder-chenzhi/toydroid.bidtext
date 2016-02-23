@@ -34,8 +34,6 @@ public class TypingSubGraph {
 		value2Nodes = new HashMap<Integer, TypingNode>();
 		staticField2Nodes = new HashMap<FieldReference, TypingNode>();
 		ir = cgNode.getIR();
-//		System.err.println(cgNode.getMethod().getSignature() + " <<>> "
-//				+ (cgNode.getMethod().isNative()));
 		if (ir != null) {
 			symTable = ir.getSymbolTable();
 			fakeInitialValueNumber = ir.getControlFlowGraph()
@@ -87,6 +85,15 @@ public class TypingSubGraph {
 	public TypingNode createStaticFieldNode(FieldReference f) {
 		int fv = nextFakeValue();
 		TypingNode node = new TypingNode(cgNode, fv, f);
+		value2Nodes.put(fv, node);
+		typingGraph.addNode(node);
+		return node;
+	}
+
+	public TypingNode createFakeConstantNode() {
+		int fv = nextFakeValue();
+		TypingNode node = new TypingNode(cgNode, fv);
+		node.markFakeStringKind();
 		value2Nodes.put(fv, node);
 		typingGraph.addNode(node);
 		return node;
