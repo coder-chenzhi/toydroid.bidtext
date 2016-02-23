@@ -826,6 +826,8 @@ public class TypingGraphUtil {
 		String apiRule = APIPropagationRules.getRule(sig);
 		if (apiRule != null) {
 			handleAPIByRule(stmt, inst, apiRule, defNode, defRec, sg);
+		} else if ((apiRule = APISourceCorrelationRules.getRule(sig)) != null) {
+			handleAPISourceByRule(stmt, inst, apiRule, defNode, defRec, sg);
 		} else {
 			int apiConstraint = TypingConstraint.GE;
 			if (SpecialModel.isSpecialModel(inst)) {
@@ -1014,6 +1016,18 @@ public class TypingGraphUtil {
 				}
 			}
 		}
+	}
+
+	private static void handleAPISourceByRule(Statement stmt,
+			SSAAbstractInvokeInstruction inst, String rule, TypingNode defNode,
+			TypingRecord defRec, TypingSubGraph sg) {
+		TypingNode fakeNode = sg.createFakeConstantNode();
+		TypingRecord fakeRec = currentTypingGraph.findOrCreateTypingRecord(fakeNode.getGraphNodeId());
+		fakeRec.addTypingText(rule);
+		TypingConstraint c = new TypingConstraint(defNode.getGraphNodeId(),
+				TypingConstraint.GE_UNIDIR, fakeNode.getGraphNodeId());
+		c.addPath(stmt);
+		fakeRec.addForwardTypingConstraint(c);
 	}
 
 	private static void handleSSAPhi(CGNode cgNode, PhiStatement stmt,
@@ -1392,6 +1406,8 @@ public class TypingGraphUtil {
 							worklist.add(rec);
 						}
 					}
+				} else if (tn.isFakeString()) {
+					worklist.add(rec);
 				} else {
 					Object o = tn.cgNode.getIR()
 							.getSymbolTable()
