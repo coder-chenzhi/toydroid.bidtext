@@ -765,6 +765,7 @@ public class TypingGraphUtil {
 		TypingNode defNode = null, thisNode = null;
 		int idx;
 		TypingNode node;
+		boolean skipThis = false;
 		if (inst.isStatic()) {
 			for (idx = 0; idx < nParam; idx++) {
 				int use = inst.getUse(idx);
@@ -792,6 +793,14 @@ public class TypingGraphUtil {
 			}
 			// freeNodes[nFreeVar++] = sg.findOrCreate(inst.getReceiver());
 			thisNode = sg.findOrCreate(inst.getReceiver());
+			String thisType = inst.getDeclaredTarget()
+					.getDeclaringClass()
+					.getName()
+					.toString();
+			if (thisType.startsWith("Landroid/app")
+					|| thisType.startsWith("Landroid/content")) {
+				skipThis = true;
+			}
 		}
 		// handle return value
 		if (inst.hasDef()) {
@@ -847,7 +856,7 @@ public class TypingGraphUtil {
 					cRec.addForwardTypingConstraint(c);
 				}
 				if (apiType != 2) {
-					if (thisRec != null) {
+					if (thisRec != null && !skipThis) {
 						TypingConstraint c = new TypingConstraint(
 								thisNode.getGraphNodeId(), apiConstraint,
 								pNode.getGraphNodeId());
@@ -868,7 +877,7 @@ public class TypingGraphUtil {
 				for (int cdx = 0; cdx < nConstVar; cdx++) {
 					TypingNode cNode = constNodes[cdx];
 					TypingRecord cRec = currentTypingGraph.findOrCreateTypingRecord(cNode.getGraphNodeId());
-					if (thisRec != null) {
+					if (thisRec != null && !skipThis) {
 						TypingConstraint c = new TypingConstraint(
 								thisNode.getGraphNodeId(), TypingConstraint.GE,
 								cNode.getGraphNodeId());
@@ -884,7 +893,7 @@ public class TypingGraphUtil {
 					}
 				}
 			}
-			if (thisRec != null && defRec != null && apiType != 2) {
+			if (thisRec != null && !skipThis && defRec != null && apiType != 2) {
 				TypingConstraint c = new TypingConstraint(
 						defNode.getGraphNodeId(), apiConstraint,
 						thisNode.getGraphNodeId());
