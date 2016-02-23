@@ -1,0 +1,6 @@
+android.location.Location.getLatitude()D latitude
+android.location.Location.getLongitude()D longitude
+android.telephony.TelephonyManager.getDeviceId()Ljava/lang/String; imei
+android.telephony.TelephonyManager.getSubscriberId()Ljava/lang/String; imsi
+android.telephony.TelephonyManager.getSimSerialNumber()Ljava/lang/String; imei
+android.telephony.TelephonyManager.getLine1Number()Ljava/lang/String; imei
