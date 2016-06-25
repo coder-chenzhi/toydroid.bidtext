@@ -1,3 +1,5 @@
 bin/
 *~
 dat/Config.properties
+build/
+.gradle/

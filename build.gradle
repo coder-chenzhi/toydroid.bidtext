@@ -1,0 +1,55 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'edu.purdue.cs.toydroid.bidtext.TextLeak'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+
+repositories {
+    mavenCentral()
+}
+
+distributions {
+    main {
+        baseName = 'BidText'
+        // include the configuration files into the distribution zip
+        contents {
+            into('/' + distributions.main.baseName) {
+                from '.'
+                include 'dat/*'
+                exclude 'dat/Config.properties'
+            }
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src"]
+        }
+        resources {
+            srcDirs = ["res"]
+        }
+    }
+}
+
+
+jar {
+    baseName = 'ToyDroid.BidText'
+    manifest {
+        attributes 'Main-Class': 'edu.purdue.cs.toydroid.bidtext.TextLeak'
+    }
+}
+
+dependencies {
+    // local libs
+    compile fileTree(dir: 'lib', include: ['*.jar'])
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.13'
+}
+
