@@ -2,6 +2,7 @@ package edu.purdue.cs.toydroid.bidtext.analysis;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
@@ -54,6 +55,8 @@ public class AnalysisUtil {
 	private static Map<String, Integer> activity2Layout = new HashMap<String, Integer>();
 
 	private static InterestingNode latestInterestingNode = null;
+
+	public static boolean DUMP_VERBOSE = false;
 
 	public static void associateLayout2Activity(
 			SSAAbstractInvokeInstruction instr, CGNode cgNode) {
@@ -125,11 +128,12 @@ public class AnalysisUtil {
 	private static void dumpTextForSink(InterestingNode sink, int idx) {
 		logger.info(" - dump text for sink: {}", sink.sinkSignature());
 		Iterator<TypingNode> args = sink.iterateInterestingArgs();
+		File resultFile = new File(idx + "." + sink.tag + ".txt");
+		long fLen = 0;
 
 		BufferedWriter writer = null;
 		try {
-			writer = new BufferedWriter(new FileWriter(idx + "." + sink.tag
-					+ ".txt"));
+			writer = new BufferedWriter(new FileWriter(resultFile));
 			writer.write("SINK [");
 			writer.write(sink.sinkSignature());
 			writer.write(']');
@@ -139,6 +143,7 @@ public class AnalysisUtil {
 					.getSignature());
 			writer.write(']');
 			writer.newLine();
+			writer.flush();
 		} catch (IOException e) {
 			logger.error("Fail to create dump file for [{}] {}", idx,
 					sink.sinkSignature());
@@ -148,8 +153,13 @@ public class AnalysisUtil {
 				} catch (Exception ee) {
 				}
 			}
+			if (resultFile.exists()) {
+				resultFile.delete();
+			}
 			return;
 		}
+		fLen = resultFile.length();
+
 		Map<Entrypoint, Set<TypingNode>> visited = new HashMap<Entrypoint, Set<TypingNode>>();
 		Map<String, List<Statement>> codeTexts = new HashMap<String, List<Statement>>();
 		Set<Integer> constants = new HashSet<Integer>();
@@ -254,14 +264,16 @@ public class AnalysisUtil {
 
 		String guiSensitiveTag = textAnalysis.analyze(guiTexts, true);
 
-		if (!sensitiveTag.isEmpty()) {
-			logger.debug("   $[CODE] {}", sensitiveTag);
-			try {
-				writer.write(" ^[CODE]: ");
-				writer.write(sensitiveTag);
-				writer.newLine();
-			} catch (IOException e) {
+		if (DUMP_VERBOSE) {
+			if (!sensitiveTag.isEmpty()) {
+				logger.debug("   $[CODE] {}", sensitiveTag);
+				try {
+					writer.write(" ^[CODE]: ");
+					writer.write(sensitiveTag);
+					writer.newLine();
+				} catch (IOException e) {
 
+				}
 			}
 		}
 
@@ -276,34 +288,36 @@ public class AnalysisUtil {
 			}
 		}
 
-		for (String t : codeTexts.keySet()) {
-			try {
-				writer.write(" - ");
-				writer.write(t);
-				writer.newLine();
-			} catch (IOException e) {
-			}
-		}
-		for (String t : guiTexts.keySet()) {
-			try {
-				writer.write(" + ");
-				writer.write(t);
-				writer.newLine();
-			} catch (IOException e) {
-			}
-		}
-		constants.removeAll(toRemove);
-		for (Integer iObj : constants) {
-			try {
-				writer.write(" # 0x");
-				writer.write(Integer.toHexString(iObj.intValue()));
-				writer.newLine();
-				String guiText = ResourceUtil.getLayoutText(iObj);
-				if (guiText != null && !guiText.isEmpty()) {
-					writer.write(guiText);
+		if (DUMP_VERBOSE) {
+			for (String t : codeTexts.keySet()) {
+				try {
+					writer.write(" - ");
+					writer.write(t);
 					writer.newLine();
+				} catch (IOException e) {
 				}
-			} catch (IOException e) {
+			}
+			for (String t : guiTexts.keySet()) {
+				try {
+					writer.write(" + ");
+					writer.write(t);
+					writer.newLine();
+				} catch (IOException e) {
+				}
+			}
+			constants.removeAll(toRemove);
+			for (Integer iObj : constants) {
+				try {
+					writer.write(" # 0x");
+					writer.write(Integer.toHexString(iObj.intValue()));
+					writer.newLine();
+					String guiText = ResourceUtil.getLayoutText(iObj);
+					if (guiText != null && !guiText.isEmpty()) {
+						writer.write(guiText);
+						writer.newLine();
+					}
+				} catch (IOException e) {
+				}
 			}
 		}
 		// dumpTextForPossibleGUI(sink, writer);
@@ -350,6 +364,10 @@ public class AnalysisUtil {
 				} catch (IOException e) {
 				}
 			}
+		}
+
+		if (resultFile.exists() && fLen + 10 >= resultFile.length()) {
+			resultFile.delete();
 		}
 	}
 

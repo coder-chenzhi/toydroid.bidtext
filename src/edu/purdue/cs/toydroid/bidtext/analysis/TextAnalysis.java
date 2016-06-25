@@ -13,9 +13,19 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.ibm.wala.ipa.callgraph.CGNode;
+import com.ibm.wala.ipa.slicer.NormalReturnCallee;
+import com.ibm.wala.ipa.slicer.NormalReturnCaller;
+import com.ibm.wala.ipa.slicer.NormalStatement;
 import com.ibm.wala.ipa.slicer.ParamCaller;
 import com.ibm.wala.ipa.slicer.Statement;
+import com.ibm.wala.ssa.IR;
+import com.ibm.wala.ssa.SSAAbstractInvokeInstruction;
+import com.ibm.wala.ssa.SSAInstruction;
+import com.ibm.wala.ssa.SymbolTable;
 
+import edu.purdue.cs.toydroid.bidtext.graph.APISourceCorrelationRules;
+import edu.purdue.cs.toydroid.utils.WalaUtil;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -122,25 +132,86 @@ public class TextAnalysis {
 			if (texts.containsKey("android_id")) {
 				List<Statement> p = texts.get("android_id");
 				boolean skip = false;
-				if (p != null && p.size() == 2) {
+				if (p != null && p.size() >= 2) {
 					Statement s = p.get(0);
 					if (s.getKind() == Statement.Kind.PARAM_CALLER) {
-						ParamCaller pc = (ParamCaller)s;
-						if (pc.getInstruction().getDeclaredTarget().getSignature().startsWith("com.facebook.internal.Utility.logd")){
+						ParamCaller pc = (ParamCaller) s;
+						if (pc.getInstruction()
+								.getDeclaredTarget()
+								.getSignature()
+								.startsWith(
+										"com.facebook.internal.Utility.logd")) {
 							skip = true;
 						}
 					}
 				}
 				if (!skip) {
-				text2Path.put("android_id", texts.remove("android_id"));
-				record("android_id");
+					text2Path.put("android_id", texts.remove("android_id"));
+					record("android_id");
 				}
 			}
 		}
 		List<String> f = purify(texts);
 		// logger.debug("  {}", f.toString());
 		check(f, texts);
+		refineText2Path();
 		return tagBuilder.toString();
+	}
+
+	private void refineText2Path() {
+		if (text2Path.isEmpty()) {
+			return;
+		}
+		Set<Map.Entry<String, List<Statement>>> pSet = text2Path.entrySet();
+		Set<String> refined = new HashSet<String>();
+		for (Map.Entry<String, List<Statement>> pEntry : pSet) {
+			String text = pEntry.getKey();
+			List<Statement> path = pEntry.getValue();
+			if (path == null) {
+				refined.add(text);
+			} else if (!path.isEmpty()) {
+				Statement startStmt = path.get(0);
+				SSAInstruction instr = null;
+				if (Statement.Kind.NORMAL == startStmt.getKind()) {
+					NormalStatement nstmt = (NormalStatement) startStmt;
+					instr = nstmt.getInstruction();
+				} else if (Statement.Kind.NORMAL_RET_CALLER == startStmt.getKind()) {
+					NormalReturnCaller nrc = (NormalReturnCaller) startStmt;
+					instr = nrc.getInstruction();
+				} else if (Statement.Kind.PARAM_CALLER == startStmt.getKind()) {
+					ParamCaller pcaller = (ParamCaller) startStmt;
+					instr = pcaller.getInstruction();
+				}
+				boolean hit = false;
+				if (instr != null) {
+					int nUses = instr.getNumberOfUses();
+					SymbolTable symTable = null;
+					if (nUses > 0) {
+						CGNode node = startStmt.getNode();
+						IR ir = node.getIR();
+						symTable = ir.getSymbolTable();
+					}
+					for (int i = 0; i < nUses; i++) {
+						int uVal = instr.getUse(i);
+						if (symTable.isStringConstant(uVal)
+								&& text.equals(symTable.getStringValue(uVal))) {
+							hit = true;
+							break;
+						}
+					}
+					if (!hit && instr instanceof SSAAbstractInvokeInstruction) {
+						String sig = WalaUtil.getSignature((SSAAbstractInvokeInstruction) instr);
+						if (sig != null
+								&& text.equals(APISourceCorrelationRules.getRule(sig))) {
+							hit = true;
+						}
+					}
+				}
+				if (!hit) {
+					refined.add(text);
+				}
+			}
+		}
 	}
 
 	private String rebuildString(List<? extends HasWord> sentence) {
@@ -267,7 +338,8 @@ public class TextAnalysis {
 					|| str.startsWith("android.permission.")
 					|| str.startsWith("android.intent.")) {
 				continue;
-			} else if (!str.contains(" ")) {
+			} else if (!str.contains(" ")
+					&& !str.toLowerCase().contains("appuid")) {
 				String splited = splitWord(str);
 				if (containsKeywords(str)
 						|| containsKeywords(splited.toLowerCase())) {
