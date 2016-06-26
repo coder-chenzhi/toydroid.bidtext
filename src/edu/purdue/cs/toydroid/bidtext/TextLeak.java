@@ -59,7 +59,7 @@ public class TextLeak implements Callable<TextLeak> {
 	private static long timeout = 20;
 	private static long taskStart;
 
-	static String ApkFile = "E:\\Eclipse-Workspace\\TestAndroidAct\\bin\\TestAndroidAct.apk";
+	static String ApkFile = "E:\\Eclipse-Workspace\\TestAndroidAct\\bin\\TestAndroidAct.apk";//"E:\\air.com.boostr.FR-1015000.apk";//
 
 	// static String ApkFile =
 	// "E:\\x\\y\\AM-com.nitrogen.android-221000000.apk";
@@ -69,6 +69,18 @@ public class TextLeak implements Callable<TextLeak> {
 		if (args.length == 1) {
 			ApkFile = args[0];
 		}
+		String timeoutSetting = System.getProperty("BidText.Timeout", Long.toString(timeout));
+		try {
+			long temp = Long.parseLong(timeoutSetting);
+			if (temp < 5L) {
+				logger.warn("Too small TIMEOUT: {} minutes. Use default: {} minutes.", temp, timeout);
+			} else {
+				timeout = temp;
+			}
+		} catch (Exception e) {
+			logger.warn("Invalid TIMEOUT setting: {} minutes. Use default: {} minutes.", timeoutSetting, timeout);
+		}
+		logger.info("Set TIMEOUT as {} minutes.", timeout);
 		try {
 			doAnalysis(ApkFile);
 		} catch (Throwable e) {
@@ -237,9 +249,9 @@ public class TextLeak implements Callable<TextLeak> {
 			// entrypoint.getMethod().getName().toString() + ".dot", null,
 			// null);
 			// }
-			// SDGCache sdgCache = new SDGCache(entrypoint);
-			// sdgCache.buildCache(g, cha);
-			// SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
+//			 SDGCache sdgCache = new SDGCache(entrypoint);
+//			 sdgCache.buildCache(g, cha);
+//			 SimplifiedSDG simSDG = SimplifiedSDG.simplify(g, sdgCache);
 			// DotUtil.dotify(simSDG, WalaUtil.makeNodeDecorator(),
 			// entrypoint.getMethod().getName().toString() + ".s.dot",
 			// null, null);
