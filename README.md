@@ -1,3 +1,9 @@
+Note
+======================
+A backup of ToyDroid in [bitbucket](https://bitbucket.org/hjjandy/toydroid.bidtext/src/master/) 
+The `lib/stanford-parser-3.4.1-models.jar` is removed due to the fact that GitHub does not allow large file >100MB.
+
+
 ToyDroid
 ======================
 A framework for Android apps analysis based on 
